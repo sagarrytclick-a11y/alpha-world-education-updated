@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  MapPin, Trophy, DollarSign, Calendar, ArrowUpRight, 
+import {
+  MapPin, Trophy, DollarSign, Calendar, ArrowUpRight,
   FileText, Award, Clock, CheckCircle, Building2, User, MessageCircle, Eye,
   ArrowRight
 } from 'lucide-react';
@@ -54,7 +54,7 @@ const UniversityCard = ({ name, image, location, ranking, fees, duration, establ
   <Link href={`/colleges/${slug}`} className="group block h-full">
     <div className="relative h-full bg-white rounded-xl border-2 border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_30px_rgba(22,163,74,0.12)] hover:border-green-400 transition-all duration-500 overflow-hidden flex flex-col hover:-translate-y-1">
       <div className="relative h-40 w-full overflow-hidden">
-        <Image src={image || "/next.svg"} alt={name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+        <img src={image || "/next.svg"} alt={name} className="object-cover transition-transform duration-700 group-hover:scale-110" />
         {ranking && (
           <div className="absolute top-3 right-3 backdrop-blur-md bg-white/70 border border-white/50 text-slate-800 px-2 py-1 rounded-xl flex items-center gap-1.5 shadow-sm">
             <Trophy size={12} className="text-orange-500" />
@@ -109,7 +109,7 @@ const UniversityCard = ({ name, image, location, ranking, fees, duration, establ
 const ExamCard = ({ name, short_name, exam_type, conducting_body, exam_mode, frequency, description, slug }: ExamCardProps) => (
   <Link href={`/exams/${slug}`} className="group block h-full">
     <div className="relative h-full bg-white rounded-xl border-2 border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_30px_rgba(22,163,74,0.12)] hover:border-green-400 transition-all duration-500 flex flex-col p-6 overflow-hidden hover:-translate-y-1">
-      
+
       {/* Decorative Background Pattern */}
       <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/30 rounded-bl-full -mr-12 -mt-12 group-hover:bg-blue-100/50 transition-colors duration-500" />
 
@@ -122,7 +122,7 @@ const ExamCard = ({ name, short_name, exam_type, conducting_body, exam_mode, fre
           </div>
           <div className="absolute inset-0 bg-blue-200 blur-xl opacity-15 group-hover:opacity-30 transition-opacity" />
         </div>
-        
+
         <div className="bg-blue-50 p-1.5 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
           <Award size={16} className={slug ? "animate-spin-slow" : ""} />
         </div>
@@ -136,7 +136,7 @@ const ExamCard = ({ name, short_name, exam_type, conducting_body, exam_mode, fre
           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
           <span>{exam_type}</span>
         </div>
-        
+
         <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold mb-3">
           <Building2 size={12} className="text-green-500" />
           <span className="uppercase">{conducting_body}</span>
@@ -177,7 +177,7 @@ const ExamCard = ({ name, short_name, exam_type, conducting_body, exam_mode, fre
 const BlogCard = ({ title, excerpt, author, author_avatar, published_at, read_time, views, comments, slug, image, category }: BlogCardProps) => (
   <Link href={`/blog/${slug}`} className="group block h-full">
     <div className="relative bg-white rounded-xl border-4 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(22,163,74,0.12)] hover:border-green-500 transition-all duration-500 flex flex-col h-full overflow-hidden hover:-translate-y-2">
-      
+
       {/* Decorative Background Pattern */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-50/50 rounded-bl-full -mr-16 -mt-16 group-hover:bg-purple-100 transition-colors duration-500" />
 
@@ -191,7 +191,7 @@ const BlogCard = ({ title, excerpt, author, author_avatar, published_at, read_ti
             </div>
             <div className="absolute inset-0 bg-purple-200 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
           </div>
-          
+
           <div className="bg-purple-50 p-2 rounded-xl text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
             <FileText size={20} className={slug ? "animate-spin-slow" : ""} />
           </div>
@@ -253,13 +253,13 @@ const BlogCard = ({ title, excerpt, author, author_avatar, published_at, read_ti
 
 // --- Universities Section Component ---
 
-const UniversitiesSection = ({ 
-  universities, 
-  allUniversities, 
-  loading, 
-  loadingMore, 
-  loadMoreUniversities 
-}: { 
+const UniversitiesSection = ({
+  universities,
+  allUniversities,
+  loading,
+  loadingMore,
+  loadMoreUniversities
+}: {
   universities: UniversityCardProps[];
   allUniversities: UniversityCardProps[];
   loading: boolean;
@@ -275,7 +275,7 @@ const UniversitiesSection = ({
         World-class education for your bright future.
       </p>
     </div>
-    
+
     {/* Loading State */}
     {loading ? (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -323,13 +323,13 @@ const UniversitiesSection = ({
               )}
             </button>
           )}
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <span className="text-slate-500 text-sm">
               Showing {universities.length} of {allUniversities.length} colleges
             </span>
-            <Link 
-              href="/colleges" 
+            <Link
+              href="/colleges"
               className="inline-flex items-center gap-2 text-green-600 font-bold hover:text-green-700 transition-colors"
             >
               View All Colleges
@@ -344,13 +344,13 @@ const UniversitiesSection = ({
 
 // --- Exams Section Component ---
 
-const ExamsSection = ({ 
-  exams, 
-  allExams, 
-  loading, 
-  loadingMore, 
-  loadMoreExams 
-}: { 
+const ExamsSection = ({
+  exams,
+  allExams,
+  loading,
+  loadingMore,
+  loadMoreExams
+}: {
   exams: ExamCardProps[];
   allExams: ExamCardProps[];
   loading: boolean;
@@ -366,7 +366,7 @@ const ExamsSection = ({
         Clear your path to international admissions.
       </p>
     </div>
-    
+
     {/* Loading State */}
     {loading ? (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -414,13 +414,13 @@ const ExamsSection = ({
               )}
             </button>
           )}
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <span className="text-slate-500 text-sm">
               Showing {exams.length} of {allExams.length} exams
             </span>
-            <Link 
-              href="/exams" 
+            <Link
+              href="/exams"
               className="inline-flex items-center gap-2 text-green-600 font-bold hover:text-green-700 transition-colors"
             >
               View All Exams
@@ -455,12 +455,12 @@ export default function FeaturedSection() {
       try {
         // Fetch both universities and exams in parallel
         const [uniRes, examRes] = await Promise.all([
-          fetch("/api/colleges"), 
+          fetch("/api/colleges"),
           fetch("/api/exams")
         ]);
-        
+
         const [uniData, examData] = await Promise.all([
-          uniRes.json(), 
+          uniRes.json(),
           examRes.json()
         ]);
 
@@ -478,7 +478,7 @@ export default function FeaturedSection() {
             country: u.country_ref?.name,
             about: u.about_content
           }));
-          
+
           setAllUniversities(transformedUniversities);
           setUniversities(transformedUniversities.slice(0, 6));
         }
@@ -495,7 +495,7 @@ export default function FeaturedSection() {
             description: e.description,
             slug: e.slug
           }));
-          
+
           setAllExams(transformedExams);
           setExams(transformedExams.slice(0, 6));
         }
@@ -515,7 +515,7 @@ export default function FeaturedSection() {
       setUniversitiesLoadingMore(true);
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       const newDisplayCount = universitiesDisplayCount + 6;
       setUniversitiesDisplayCount(newDisplayCount);
       setUniversities(allUniversities.slice(0, newDisplayCount));
@@ -531,7 +531,7 @@ export default function FeaturedSection() {
       setExamsLoadingMore(true);
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       const newDisplayCount = examsDisplayCount + 6;
       setExamsDisplayCount(newDisplayCount);
       setExams(allExams.slice(0, newDisplayCount));
@@ -544,14 +544,14 @@ export default function FeaturedSection() {
 
   return (
     <div className="space-y-24 py-24 bg-white overflow-hidden">
-      <UniversitiesSection 
+      <UniversitiesSection
         universities={universities}
         allUniversities={allUniversities}
         loading={universitiesLoading}
         loadingMore={universitiesLoadingMore}
         loadMoreUniversities={loadMoreUniversities}
       />
-      <ExamsSection 
+      <ExamsSection
         exams={exams}
         allExams={allExams}
         loading={examsLoading}

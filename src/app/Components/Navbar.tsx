@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Menu, X, Phone, Mail, MapPin, ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -45,7 +44,7 @@ export default function Navbar() {
       href: `/colleges/${college.slug}`
     })),
     Exams: exams.map(exam => ({
-      title: exam.name,
+      title: exam.short_name,
       href: `/exams/${exam.slug}`
     })),
     Countries: countries.map(country => ({
@@ -115,13 +114,12 @@ export default function Navbar() {
             {/* LOGO */}
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative">
-                <Image
+                <img
                   src={SITE_IDENTITY.assets.logo.main}
                   alt={SITE_IDENTITY.name}
                   width={60}
                   height={60}
                   className="transition-transform duration-300 group-hover:scale-110"
-                  priority
                 />
               </div>
             </Link>

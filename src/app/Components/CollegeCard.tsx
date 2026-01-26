@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   MapPin,
@@ -49,12 +48,10 @@ export default function CollegeCard({ data }: CollegeCardProps) {
     <div className="group overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-green-200">
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
-        <Image
+        <img
           src={imageUrl}
           alt={data.name || "College"}
-          fill
-          sizes="(max-width: 768px) 100vw, 33vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 

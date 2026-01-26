@@ -51,7 +51,7 @@ export const FormModal: React.FC = () => {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       {/* Backdrop - Darker for better contrast with the white modal */}
       <div 
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-md"
@@ -59,13 +59,13 @@ export const FormModal: React.FC = () => {
       />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 w-full max-w-md overflow-hidden transform transition-all">
+      <div className="relative bg-white rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 w-full max-w-md overflow-hidden transform transition-all">
         
         {/* Header - Subtle Mint background */}
-        <div className="flex items-center justify-between p-8 bg-slate-50/50 border-b border-slate-100">
+        <div className="flex items-center justify-between p-6 sm:p-8 bg-slate-50/50 border-b border-slate-100">
           <div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Get in Touch</h2>
-            <p className="text-sm font-medium text-slate-500">We&apos;ll get back to you shortly.</p>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Get in Touch</h2>
+            <p className="text-xs sm:text-sm font-medium text-slate-500">We&apos;ll get back to you shortly.</p>
           </div>
           <button
             onClick={handleClose}
@@ -76,7 +76,7 @@ export const FormModal: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-4 sm:space-y-5">
           {[
             { id: 'name', label: 'Full Name', type: 'text', placeholder: 'John Doe', value: formData.name },
             { id: 'email', label: 'Email Address', type: 'email', placeholder: 'john@example.com', value: formData.email },
@@ -84,7 +84,7 @@ export const FormModal: React.FC = () => {
             { id: 'city', label: 'City', type: 'text', placeholder: 'New York', value: formData.city }
           ].map((field) => (
             <div key={field.id}>
-              <label htmlFor={field.id} className="block text-sm font-bold text-slate-700 mb-2 ml-1">
+              <label htmlFor={field.id} className="block text-xs sm:text-sm font-bold text-slate-700 mb-2 ml-1">
                 {field.label}
               </label>
               <input
@@ -93,7 +93,7 @@ export const FormModal: React.FC = () => {
                 required
                 value={field.value}
                 onChange={(e) => updateFormData({ [field.id]: e.target.value })}
-                className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all font-medium"
+                className="w-full px-4 sm:px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 focus:bg-white outline-none transition-all font-medium text-sm sm:text-base"
                 placeholder={field.placeholder}
               />
             </div>

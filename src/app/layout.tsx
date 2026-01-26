@@ -18,10 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: SITE_IDENTITY.meta.title,
   description: SITE_IDENTITY.meta.description,
-  keywords: SITE_IDENTITY.meta.keywords,
+   keywords: SITE_IDENTITY.meta.keywords,
   authors: [{ name: SITE_IDENTITY.meta.author }],
   creator: SITE_IDENTITY.meta.author,
   publisher: SITE_IDENTITY.meta.author,
+  viewport: 'width=device-width, initial-scale=1',
   openGraph: {
     title: SITE_IDENTITY.meta.title,
     description: SITE_IDENTITY.meta.description,

@@ -63,15 +63,15 @@ export function AdminTable<T = Record<string, unknown>>({
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <div className="text-lg font-medium mb-2">{emptyMessage}</div>
+      <div className="text-center py-8 sm:py-12 text-gray-500">
+        <div className="text-base sm:text-lg font-medium mb-2">{emptyMessage}</div>
         <div className="text-sm">No records found</div>
       </div>
     )
   }
 
   return (
-    <div className={`rounded-md border ${className}`}>
+    <div className={`rounded-md border overflow-x-auto ${className}`}>
       <Table>
         <TableHeader>
           <TableRow>

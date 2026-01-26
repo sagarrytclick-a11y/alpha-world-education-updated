@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -162,12 +161,10 @@ const BlogDetailPage = () => {
       {/* Featured Image */}
       {blog.image && (
         <div className="relative h-96 w-full overflow-hidden bg-slate-100">
-          <Image
+          <img
             src={blog.image.startsWith('http') ? blog.image : `/images/${blog.image}`}
             alt={blog.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+            className="w-full h-full object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
