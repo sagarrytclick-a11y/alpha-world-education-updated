@@ -1,0 +1,200 @@
+"use client"
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { MapPin, Globe, ArrowRight, GraduationCap, Zap, Compass, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const CountryCard = ({ country }: { country: any }) => (
+  <Link href={`/countries/${country.slug}`} className="group block h-full">
+    <div className="relative bg-white rounded-[2rem] border-2 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(22,163,74,0.12)] hover:border-green-500 transition-all duration-500 flex flex-col h-full overflow-hidden hover:-translate-y-2">
+      
+      {/* Decorative Background Pattern */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-green-50/50 rounded-bl-full -mr-16 -mt-16 group-hover:bg-green-100 transition-colors duration-500" />
+
+      {/* Header Section */}
+      <div className="p-8 pb-0 relative">
+        <div className="flex items-start justify-between">
+          {/* Floating Flag with Ring */}
+          <div className="relative">
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-xl border border-slate-50 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 relative z-10">
+              {country.flag}
+            </div>
+            <div className="absolute inset-0 bg-green-200 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
+          </div>
+          
+          <div className="bg-green-50 p-2 rounded-xl text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all duration-500">
+            <Compass size={20} className={country.slug ? "animate-spin-slow" : ""} />
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-2xl font-black text-slate-900 leading-tight">
+            {country.name}
+          </h3>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Study Destination</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Body Section */}
+      <div className="p-8 flex-grow flex flex-col">
+        <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium">
+          {country.description}
+        </p>
+
+        {/* Status Badge */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+            <Globe size={14} className="text-green-600" />
+            <span className="text-[10px] font-black text-slate-600 uppercase">
+              {country.is_active ? 'Available' : 'Unavailable'}
+            </span>
+          </div>
+        </div>
+
+        {/* Modern Footer CTA */}
+        <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Country Info</span>
+            <span className="text-sm font-bold text-slate-900">Explore Opportunities</span>
+          </div>
+          <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center group-hover:bg-green-600 transition-colors shadow-lg">
+            <ArrowRight size={18} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </Link>
+);
+
+const PopularCountries = () => {
+  const [countries, setCountries] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await fetch("/api/countries");
+        const data = await res.json();
+        setCountries(data.success && data.data ? data.data.slice(0, 6) : []);
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCountries();
+  }, []);
+
+  // Use your actual data or these improved fallback objects
+  const displayCountries = countries.length > 0 ? countries : [
+    { name: 'Australia', flag: '🇦🇺', slug: 'australia', description: 'Experience a high standard of living and world-class education in the Land Down Under.' },
+    { name: 'Canada', flag: '🇨🇦', slug: 'canada', description: 'Famous for its diverse culture and friendly immigration policies for international students.' },
+    { name: 'United Kingdom', flag: '🇬🇧', slug: 'united-kingdom', description: 'Home to historic institutions and a global hub for innovation and research.' },
+    { name: 'United States', flag: '🇺🇸', slug: 'united-states', description: 'Land of opportunity with world-renowned universities and cutting-edge research facilities.' },
+    { name: 'Germany', flag: '🇩🇪', slug: 'germany', description: 'Excellent education system with low or no tuition fees for international students.' },
+    { name: 'France', flag: '🇫🇷', slug: 'france', description: 'Rich cultural heritage combined with prestigious educational institutions.' }
+  ];
+
+  const nextSlide = () => {
+    const maxIndex = Math.max(0, displayCountries.length - 3);
+    setCurrentIndex((prevIndex) => (prevIndex + 1 > maxIndex) ? 0 : prevIndex + 1);
+  };
+
+  const prevSlide = () => {
+    const maxIndex = Math.max(0, displayCountries.length - 3);
+    setCurrentIndex((prevIndex) => (prevIndex - 1 < 0) ? maxIndex : prevIndex - 1);
+  };
+
+  const goToSlide = (index: number) => {
+    const maxIndex = Math.max(0, displayCountries.length - 3);
+    setCurrentIndex(Math.min(index, maxIndex));
+  };
+
+  return (
+    <section className="relative max-w-7xl mx-auto px-6 py-24 bg-white">
+      {/* Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-green-50/30 blur-[120px] rounded-full -z-10" />
+
+      <div className="flex flex-col md:flex-row md:items-center justify-center mb-16 gap-6">
+        <div className="text-center">
+          <h2 className="text-5xl md:text-7xl font-black text-slate-900 leading-[0.9] tracking-tighter mb-6">
+            CHOOSE YOUR <br /><span className="text-green-600">DESTINATION</span>
+          </h2>
+          <p className="text-slate-500 font-semibold text-lg max-w-md mx-auto">
+            We help you navigate the best study spots across the globe with expert insights.
+          </p>
+        </div>
+      </div>
+
+      {/* Slider Container */}
+      <div className="relative">
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-[400px] rounded-[2rem] bg-slate-50 animate-pulse border border-slate-100" />
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Slider Track */}
+            <div className="overflow-hidden">
+              <div 
+                className="flex transition-transform duration-500 ease-in-out gap-6"
+                style={{ transform: `translateX(-${currentIndex * 33.333}%)` }}
+              >
+                {displayCountries.map((country, index) => (
+                  <div key={index} className="w-full md:w-1/3 flex-shrink-0">
+                    <CountryCard country={country} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevSlide}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white rounded-full p-3 shadow-lg border border-slate-200 hover:bg-green-50 hover:border-green-300 transition-all duration-300 z-10"
+              aria-label="Previous country"
+            >
+              <ChevronLeft size={20} className="text-slate-700" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white rounded-full p-3 shadow-lg border border-slate-200 hover:bg-green-50 hover:border-green-300 transition-all duration-300 z-10"
+              aria-label="Next country"
+            >
+              <ChevronRight size={20} className="text-slate-700" />
+            </button>
+
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 mt-8">
+              {Array.from({ length: Math.max(1, displayCountries.length - 2) }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    currentIndex === index 
+                      ? 'bg-green-600 w-8' 
+                      : 'bg-slate-300 hover:bg-slate-400'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="mt-16 md:hidden text-center">
+        <Link href="/countries" className="inline-flex items-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-full font-bold">
+          See All Countries <ArrowRight size={18} />
+        </Link>
+      </div>
+    </section>
+  );
+};
+
+export default PopularCountries;
