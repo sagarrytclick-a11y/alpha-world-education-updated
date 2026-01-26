@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -66,12 +65,10 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
       <div className="relative h-[500px] overflow-hidden">
         {college.banner_url ? (
           <>
-            <Image
+            <img
               src={college.banner_url}
               alt={college.name}
-              fill
-              className="object-cover"
-              priority
+              className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
           </>

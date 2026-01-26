@@ -5,17 +5,17 @@ import { MapPin, Globe, ArrowRight, GraduationCap, Zap, Compass, ChevronLeft, Ch
 
 const CountryCard = ({ country }: { country: any }) => (
   <Link href={`/countries/${country.slug}`} className="group block h-full">
-    <div className="relative bg-white rounded-[2rem] border-2 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(22,163,74,0.12)] hover:border-green-500 transition-all duration-500 flex flex-col h-full overflow-hidden hover:-translate-y-2">
+    <div className="relative bg-white rounded-[1.5rem] sm:rounded-[2rem] border-2 border-slate-300 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_30px_60px_rgba(22,163,74,0.12)] hover:border-green-500 transition-all duration-500 flex flex-col h-full overflow-hidden hover:-translate-y-2">
       
       {/* Decorative Background Pattern */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-green-50/50 rounded-bl-full -mr-16 -mt-16 group-hover:bg-green-100 transition-colors duration-500" />
 
       {/* Header Section */}
-      <div className="p-8 pb-0 relative">
+      <div className="p-4 sm:p-6 lg:p-8 pb-0 relative">
         <div className="flex items-start justify-between">
           {/* Floating Flag with Ring */}
           <div className="relative">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-xl border border-slate-50 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 relative z-10">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-xl border border-slate-50 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 relative z-10">
               {country.flag}
             </div>
             <div className="absolute inset-0 bg-green-200 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
@@ -26,8 +26,8 @@ const CountryCard = ({ country }: { country: any }) => (
           </div>
         </div>
 
-        <div className="mt-6">
-          <h3 className="text-2xl font-black text-slate-900 leading-tight">
+        <div className="mt-4 sm:mt-6">
+          <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
             {country.name}
           </h3>
           <div className="flex items-center gap-1.5 mt-1">
@@ -38,13 +38,13 @@ const CountryCard = ({ country }: { country: any }) => (
       </div>
 
       {/* Body Section */}
-      <div className="p-8 flex-grow flex flex-col">
-        <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium">
+      <div className="p-4 sm:p-6 lg:p-8 flex-grow flex flex-col">
+        <p className="text-slate-500 text-xs sm:text-sm leading-relaxed line-clamp-3 mb-4 sm:mb-6 font-medium">
           {country.description}
         </p>
 
         {/* Status Badge */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-4 sm:mb-8">
           <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
             <Globe size={14} className="text-green-600" />
             <span className="text-[10px] font-black text-slate-600 uppercase">
@@ -54,13 +54,13 @@ const CountryCard = ({ country }: { country: any }) => (
         </div>
 
         {/* Modern Footer CTA */}
-        <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+        <div className="mt-auto pt-4 sm:pt-6 border-t border-slate-50 flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Country Info</span>
-            <span className="text-sm font-bold text-slate-900">Explore Opportunities</span>
+            <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-tighter">Country Info</span>
+            <span className="text-xs sm:text-sm font-bold text-slate-900">Explore Opportunities</span>
           </div>
-          <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center group-hover:bg-green-600 transition-colors shadow-lg">
-            <ArrowRight size={18} />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-900 text-white flex items-center justify-center group-hover:bg-green-600 transition-colors shadow-lg">
+            <ArrowRight size={18} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
           </div>
         </div>
       </div>
@@ -99,31 +99,31 @@ const PopularCountries = () => {
   ];
 
   const nextSlide = () => {
-    const maxIndex = Math.max(0, displayCountries.length - 3);
+    const maxIndex = Math.max(0, displayCountries.length - (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1));
     setCurrentIndex((prevIndex) => (prevIndex + 1 > maxIndex) ? 0 : prevIndex + 1);
   };
 
   const prevSlide = () => {
-    const maxIndex = Math.max(0, displayCountries.length - 3);
+    const maxIndex = Math.max(0, displayCountries.length - (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1));
     setCurrentIndex((prevIndex) => (prevIndex - 1 < 0) ? maxIndex : prevIndex - 1);
   };
 
   const goToSlide = (index: number) => {
-    const maxIndex = Math.max(0, displayCountries.length - 3);
+    const maxIndex = Math.max(0, displayCountries.length - (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1));
     setCurrentIndex(Math.min(index, maxIndex));
   };
 
   return (
-    <section className="relative max-w-7xl mx-auto px-6 py-24 bg-white">
+    <section className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 bg-white">
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-green-50/30 blur-[120px] rounded-full -z-10" />
 
-      <div className="flex flex-col md:flex-row md:items-center justify-center mb-16 gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-center mb-12 sm:mb-16 gap-6">
         <div className="text-center">
-          <h2 className="text-5xl md:text-7xl font-black text-slate-900 leading-[0.9] tracking-tighter mb-6">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[0.9] tracking-tighter mb-4 sm:mb-6">
             CHOOSE YOUR <br /><span className="text-green-600">DESTINATION</span>
           </h2>
-          <p className="text-slate-500 font-semibold text-lg max-w-md mx-auto">
+          <p className="text-slate-500 font-semibold text-base sm:text-lg max-w-md mx-auto">
             We help you navigate the best study spots across the globe with expert insights.
           </p>
         </div>
@@ -142,11 +142,11 @@ const PopularCountries = () => {
             {/* Slider Track */}
             <div className="overflow-hidden">
               <div 
-                className="flex transition-transform duration-500 ease-in-out gap-6"
-                style={{ transform: `translateX(-${currentIndex * 33.333}%)` }}
+                className="flex transition-transform duration-500 ease-in-out gap-4 sm:gap-6"
+                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
                 {displayCountries.map((country, index) => (
-                  <div key={index} className="w-full md:w-1/3 flex-shrink-0">
+                  <div key={index} className="w-full flex-shrink-0 md:w-1/2 lg:w-1/3">
                     <CountryCard country={country} />
                   </div>
                 ))}

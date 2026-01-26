@@ -182,10 +182,11 @@ export default function CollegesPage() {
                 <Card key={college._id} className="group border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
                   {/* Image Header */}
                   <div className="relative h-56 w-full overflow-hidden">
-                    <Image
+                    <img
                       src={college.banner_url || `https://picsum.photos/seed/${college.slug}/600/400`}
                       alt={college.name}
-                      fill
+                      width={600}
+                      height={400}
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />

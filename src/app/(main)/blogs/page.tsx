@@ -175,10 +175,11 @@ export default function BlogsPage() {
               <Card key={blog._id} className="group border border-gray-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
                 {/* Image Header */}
                 <div className="relative h-48 w-full overflow-hidden">
-                  <Image
+                  <img
                     src={blog.image || `https://picsum.photos/seed/${blog.slug}/600/400`}
                     alt={blog.title}
-                    fill
+                    width={600}
+                    height={400}
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />

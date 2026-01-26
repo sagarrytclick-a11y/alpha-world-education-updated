@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, Tag, FileText } from 'lucide-react';
 
@@ -35,11 +34,10 @@ const BlogCard = ({ title, slug, category, content, tags, createdAt, image }: Bl
         
         {/* Image Container */}
         <div className="relative h-56 w-full overflow-hidden">
-          <Image
+          <img
             src={image || "/next.svg"}
             alt={title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
           

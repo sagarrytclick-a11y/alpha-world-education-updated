@@ -9,7 +9,7 @@ interface College {
 
 interface Exam {
   _id: string
-  name: string
+  short_name: string
   slug: string
 }
 
