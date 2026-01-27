@@ -23,6 +23,10 @@ export default async function CollegePage({ params }: CollegePageProps) {
   const { slug } = await params
   const college = await getCollegeBySlug(slug)
 
+
+
+
+  
   if (!college) notFound()
 
   return <CollegeDetailPage college={college} />

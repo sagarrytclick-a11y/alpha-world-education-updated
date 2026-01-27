@@ -8,10 +8,10 @@ import { Badge } from '@/components/ui/badge'
 import { getCountryName } from "@/lib/normalize"
 
 import { Button } from '@/components/ui/button'
-import { 
-  MapPin, 
-  DollarSign, 
-  Clock, 
+import {
+  MapPin,
+  DollarSign,
+  Clock,
   GraduationCap,
   ArrowRight
 } from 'lucide-react'
@@ -50,7 +50,7 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
       setLoading(true)
       const response = await fetch(`/api/colleges/${currentCollegeSlug}/related`)
       const result = await response.json()
-      
+
       if (result.success) {
         setColleges(result.data)
       } else {
@@ -103,7 +103,7 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {colleges.map((college) => {
         const country = college.country_ref
-      const countryName = getCountryName(college.country_ref)
+        const countryName = getCountryName(college.country_ref)
 
         const countryFlag = typeof country === 'object' ? country.flag : ''
 
@@ -114,7 +114,7 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
                 <img
                   src={college.banner_url}
                   alt={college.name}
-                  
+
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
@@ -122,7 +122,7 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
                   <GraduationCap className="w-12 h-12 text-blue-600" />
                 </div>
               )}
-              
+
               <div className="absolute top-3 left-3">
                 <Badge className="bg-white/90 text-gray-800 border border-gray-200">
                   {countryFlag} {countryName}
