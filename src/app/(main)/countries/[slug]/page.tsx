@@ -106,7 +106,7 @@ const CountryPage = () => {
         
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <Link href="/countries">
-            <Button variant="ghost" className="mb-6 text-white/70 hover:text-white font-bold flex gap-2">
+            <Button variant="ghost" className="mb-6 text-white/70 font-bold flex gap-2">
               <ArrowLeft size={16} />
               Back to Countries
             </Button>

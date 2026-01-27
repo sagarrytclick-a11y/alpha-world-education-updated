@@ -129,7 +129,7 @@ export default function Navbar() {
               {navItems.map((item) => (
                 <div
                   key={item.name}
-                  className="relative"
+                  className="relative group"
                   onMouseEnter={() => item.hasDropdown && setHoveredItem(item.name)}
                   onMouseLeave={() => setHoveredItem(null)}
                 >
@@ -142,12 +142,12 @@ export default function Navbar() {
                     }`}
                   >
                     {item.name}
-                    {item.hasDropdown && <ChevronDown size={14} className="transition-transform duration-200" />}
+                    {item.hasDropdown && <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />}
                   </Link>
                   
                   {/* Dropdown Menu */}
                   {item.hasDropdown && hoveredItem === item.name && (
-                    <div className="absolute top-full left-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-slate-100 py-2 z-50">
+                    <div className="absolute top-full left-0 w-64 bg-white rounded-lg shadow-xl border border-slate-100 py-2 z-50 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
                       {loading ? (
                         <div className="px-4 py-3 text-sm text-slate-500">Loading...</div>
                       ) : dropdownContent[item.name as keyof typeof dropdownContent].length > 0 ? (

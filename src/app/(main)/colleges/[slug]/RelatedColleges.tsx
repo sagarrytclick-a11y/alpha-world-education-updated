@@ -13,7 +13,8 @@ import {
   DollarSign, 
   Clock, 
   GraduationCap,
-  ArrowRight
+  ArrowRight,
+  Award
 } from 'lucide-react'
 
 interface College {
@@ -108,48 +109,81 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
         const countryFlag = typeof country === 'object' ? country.flag : ''
 
         return (
-          <Card key={college._id} className="group hover:shadow-lg transition-shadow">
-            <div className="relative h-48 overflow-hidden rounded-t-lg">
+          <Card key={college._id} className="group border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] overflow-hidden hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] transition-all duration-300 py-0">
+            <div className="relative h-56 overflow-hidden">
               {college.banner_url ? (
                 <img
                   src={college.banner_url}
                   alt={college.name}
-                  
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                  <GraduationCap className="w-12 h-12 text-blue-600" />
+                <div className="w-full h-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
+                  <GraduationCap className="w-16 h-16 text-white/80" />
                 </div>
               )}
               
-              <div className="absolute top-3 left-3">
-                <Badge className="bg-white/90 text-gray-800 border border-gray-200">
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-white/95 backdrop-blur-sm text-gray-800 border border-gray-200 px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
                   {countryFlag} {countryName}
                 </Badge>
               </div>
+              
+              {college.ranking && (
+                <div className="absolute top-4 right-4">
+                  <Badge className="bg-yellow-500 text-white border-none px-3 py-1.5 rounded-full text-sm font-black shadow-lg">
+                    <Award className="w-3 h-3 mr-1" />
+                    #{college.ranking}
+                  </Badge>
+                </div>
+              )}
             </div>
 
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
+            <CardContent className="p-8">
+              <h3 className="text-xl font-black text-gray-900 mb-3 line-clamp-2 leading-tight">
                 {college.name}
               </h3>
 
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-sm text-gray-600">
-                  <DollarSign className="w-4 h-4 mr-1 text-green-500" />
-                  <span>${college.fees.toLocaleString()}/year</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <Clock className="w-4 h-4 mr-1 text-blue-500" />
-                  <span>{college.duration}</span>
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-gray-600">
+                    <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center mr-2">
+                      <DollarSign className="w-4 h-4 text-green-600" />
+                    </div>
+                    <span className="font-medium text-sm">${college.fees ? college.fees.toLocaleString() : 'N/A'}/year</span>
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center mr-2">
+                      <Clock className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <span className="font-medium text-sm">{college.duration || 'N/A'} years </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              {college.exams && college.exams.length > 0 && (
+                <div className="mb-6">
+                  <div className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Required Exams</div>
+                  <div className="flex flex-wrap gap-2">
+                    {college.exams.slice(0, 3).map((exam, index) => (
+                      <Badge key={index} className="bg-slate-50 text-slate-700 border border-slate-200 px-3 py-1 rounded-lg text-xs font-medium">
+                        {exam}
+                      </Badge>
+                    ))}
+                    {college.exams.length > 3 && (
+                      <Badge className="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-lg text-xs font-medium">
+                        +{college.exams.length - 3} more
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3">
                 <Link href={`/colleges/${college.slug}`} className="flex-1">
-                  <Button variant="outline" className="w-full">
+                  <Button className="w-full bg-slate-900 hover:bg-green-600 text-white font-black rounded-xl h-12 transition-all duration-300 group">
                     View Details
+                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
               </div>

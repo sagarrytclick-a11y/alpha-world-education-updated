@@ -27,7 +27,8 @@ export async function GET(
     }
 
     // Find related colleges (same country, excluding current college)
-    const relatedColleges = await College.find({
+    // If not enough colleges from same country, fetch from other countries
+    let relatedColleges = await College.find({
       _id: { $ne: currentCollege._id },
       country_ref: currentCollege.country_ref._id,
       is_active: true
@@ -36,6 +37,21 @@ export async function GET(
     .limit(6)
     .sort({ createdAt: -1 })
     .lean();
+
+    // If we don't have enough colleges from the same country, get more from other countries
+    if (relatedColleges.length < 3) {
+      const additionalColleges = await College.find({
+        _id: { $ne: currentCollege._id },
+        country_ref: { $ne: currentCollege.country_ref._id },
+        is_active: true
+      })
+      .populate('country_ref')
+      .limit(6 - relatedColleges.length)
+      .sort({ createdAt: -1 })
+      .lean();
+      
+      relatedColleges = [...relatedColleges, ...additionalColleges];
+    }
 
     return NextResponse.json({
       success: true,

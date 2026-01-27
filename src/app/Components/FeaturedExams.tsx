@@ -68,7 +68,7 @@ const UniversityCard = ({ name, image, location, ranking, fees, duration, establ
           <h3 className="text-lg font-black text-slate-900 mb-1 leading-tight group-hover:text-green-600 transition-colors uppercase">{name}</h3>
           <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
             <MapPin size={12} className="text-green-500" />
-            <span>{location}, {country}</span>
+            <span>{location} {country}</span>
           </div>
         </div>
 
@@ -86,7 +86,7 @@ const UniversityCard = ({ name, image, location, ranking, fees, duration, establ
             <p className="text-[9px] text-slate-400 uppercase font-black mb-1">Duration</p>
             <div className="flex items-center gap-1 text-slate-900 font-bold text-xs">
               <Calendar size={12} className="text-green-600" />
-              <span>{duration}</span>
+              <span>{duration} years</span>
             </div>
           </div>
         </div>
