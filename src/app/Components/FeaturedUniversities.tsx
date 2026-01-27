@@ -74,7 +74,7 @@ const UniversityCard = ({ name, image, location, ranking, fees, duration, establ
               <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Duration</p>
               <div className="flex items-center gap-1 text-slate-800 font-bold text-sm">
                 <Calendar size={14} className="text-green-600" />
-                <span>{duration}</span>
+                <span>{duration} years</span>
               </div>
             </div>
           </div>

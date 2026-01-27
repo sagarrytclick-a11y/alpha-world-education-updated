@@ -6,6 +6,8 @@ import {
   Globe,
   ArrowUpRight,
 } from "lucide-react";
+import { IconLink } from "@tabler/icons-react";
+import Link from "next/link";
 
 export default function ComprehensiveServices() {
   return (
@@ -54,19 +56,19 @@ export default function ComprehensiveServices() {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
-            <a
-              href="#"
+            <Link
+              href="/service"
               className="inline-flex items-center gap-2 sm:gap-3 bg-green-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 text-sm sm:text-base"
             >
               View All Services
               <ArrowUpRight size={18} className="sm:w-[20px] sm:h-[20px]" />
-            </a>
-            <a
+            </Link>
+            {/* <a
               href="#"
               className="inline-flex items-center gap-2 font-semibold text-green-600 hover:text-green-700 transition-colors text-sm sm:text-base"
             >
               <span>📋</span> Download Service Brochure
-            </a>
+            </a> */}
           </div>
         </div>
 

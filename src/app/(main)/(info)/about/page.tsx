@@ -7,6 +7,7 @@ import {
   MapPin, Phone, Mail, ArrowUpRight,
   Calendar, Users, Award, Globe
 } from 'lucide-react';
+import { useFormModal } from '@/context/FormModalContext';
 
 // --- Types ---
 interface TimelineItem {
@@ -65,7 +66,7 @@ const values: Value[] = [
 ];
 
 export default function AboutPage() {
-  
+   const { openModal } = useFormModal();
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans">
 
@@ -90,7 +91,7 @@ export default function AboutPage() {
             Navigating complexities so you can focus on your future.
           </p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
-            <button className="bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all shadow-lg shadow-green-200 text-sm sm:text-base">
+            <button onClick={openModal} className="bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all shadow-lg shadow-green-200 text-sm sm:text-base">
               Explore Our Story
             </button>
             {/* <button className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-700 hover:text-green-600 transition text-sm sm:text-base">

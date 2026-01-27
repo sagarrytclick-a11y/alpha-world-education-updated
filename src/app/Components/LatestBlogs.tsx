@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, Clock, ArrowRight, Tag, FileText } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, Tag, FileText, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface BlogCardProps {
   title: string;
@@ -87,8 +88,8 @@ const BlogCard = ({ title, slug, category, content, tags, createdAt, image }: Bl
           {/* Footer */}
           <div className="flex items-center justify-between pt-4 border-t-2 border-slate-100">
             <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
-              <Clock size={14} className="text-green-500" />
-              <span>{calculateReadTime(content)}</span>
+              {/* <Clock size={14} className="text-green-500" />
+              <span>{calculateReadTime(content)}</span> */}
             </div>
             
             <button className="flex items-center gap-2 text-green-600 font-bold text-sm hover:text-green-700 transition-all group/btn">
@@ -104,10 +105,15 @@ const BlogCard = ({ title, slug, category, content, tags, createdAt, image }: Bl
 
 export default function LatestBlogs() {
   const [blogs, setBlogs] = React.useState<BlogCardProps[]>([]);
+  const [displayedBlogs, setDisplayedBlogs] = React.useState<BlogCardProps[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [hasMore, setHasMore] = React.useState(true);
+  const blogsPerPage = 6;
 
 React.useEffect(() => {
   const fetchBlogs = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/blogs");
       const result = await response.json();
 
@@ -127,14 +133,31 @@ React.useEffect(() => {
       }));
 
       setBlogs(transformedBlogs);
+      
+      // Show first 6 blogs initially
+      const initialBlogs = transformedBlogs.slice(0, blogsPerPage);
+      setDisplayedBlogs(initialBlogs);
+      setHasMore(transformedBlogs.length > blogsPerPage);
     } catch (error) {
       console.error("Failed to fetch blogs:", error);
       setBlogs([]);
+      setDisplayedBlogs([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   fetchBlogs();
 }, []);
+
+  const loadMoreBlogs = () => {
+    const currentLength = displayedBlogs.length;
+    const nextBlogs = blogs.slice(currentLength, currentLength + blogsPerPage);
+    const newDisplayedBlogs = [...displayedBlogs, ...nextBlogs];
+    
+    setDisplayedBlogs(newDisplayedBlogs);
+    setHasMore(blogs.length > newDisplayedBlogs.length);
+  };
 
     
 
@@ -150,21 +173,46 @@ React.useEffect(() => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        {blogs.map((blog, index) => (
+        {displayedBlogs.map((blog, index) => (
           <BlogCard key={index} {...blog} />
         ))}
       </div>
 
-      {/* View All Blogs Button */}
-      <div className="text-center mt-12">
-        <Link 
-          href="/blogs" 
-          className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-full font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-        >
-          View All Blogs
-          <ArrowRight size={20} />
-        </Link>
-      </div>
+      {/* Load More Button */}
+      {hasMore && (
+        <div className="text-center mt-12">
+          <Button 
+            onClick={loadMoreBlogs}
+            disabled={loading}
+            className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-full font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              <>
+                Load More Blogs
+                <ArrowRight size={20} />
+              </>
+            )}
+          </Button>
+        </div>
+      )}
+
+      {/* View All Blogs Button - Only show when no more blogs to load */}
+      {!hasMore && displayedBlogs.length > 0 && (
+        <div className="text-center mt-12">
+          <Link 
+            href="/blogs" 
+            className="inline-flex items-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            View All Blogs
+            <ArrowRight size={20} />
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

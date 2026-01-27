@@ -6,12 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFormModal } from '@/context/FormModalContext'
-import { 
-  MapPin, 
-  GraduationCap, 
-  DollarSign, 
-  Clock, 
-  Award, 
+import { useContactInfo, createMailtoLink, createTelLink } from '@/hooks/useContactInfo'
+import {
+  MapPin,
+  GraduationCap,
+  DollarSign,
+  Clock,
+  Award,
   Calendar,
   Phone,
   Mail,
@@ -55,18 +56,18 @@ interface CollegeDetailPageProps {
 
 export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
   const { openModal } = useFormModal();
-  // const country = college.country_ref
+  const contactInfo = useContactInfo();
   const country = college.country_ref
 
-const countryName =
-  country && typeof country === "object"
-    ? country.name
-    : country || ""
+  const countryName =
+    typeof country === "object"
+      ? country.name
+      : country || ""
 
-const countryFlag =
-  country && typeof country === "object"
-    ? country.flag
-    : ""
+  const countryFlag =
+    country && typeof country === "object"
+      ? country.flag
+      : ""
 
 
   return (
@@ -85,7 +86,7 @@ const countryFlag =
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-blue-600" />
         )}
-        
+
         <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div className="text-white">
@@ -104,15 +105,15 @@ const countryFlag =
                   </Badge>
                 )}
               </div>
-              
+
               <h1 className="text-5xl md:text-7xl font-black leading-[0.9] mb-6">
                 {college.name}
               </h1>
-              
+
               <p className="text-xl text-white/90 max-w-3xl mb-8 font-medium leading-relaxed">
                 {college.about_content.substring(0, 200)}...
               </p>
-              
+
               <div className="flex flex-wrap gap-6">
                 <div className="flex items-center text-white">
                   <Calendar className="w-5 h-5 mr-3 text-green-400" />
@@ -120,7 +121,7 @@ const countryFlag =
                 </div>
                 <div className="flex items-center text-white">
                   <Clock className="w-5 h-5 mr-3 text-blue-400" />
-                  <span className="font-bold">{college.duration}</span>
+                  <span className="font-bold">{college.duration} years</span>
                 </div>
                 <div className="flex items-center text-white">
                   <Award className="w-5 h-5 mr-3 text-yellow-400" />
@@ -151,7 +152,7 @@ const countryFlag =
                   <Clock className="w-8 h-8 text-blue-600" />
                 </div>
                 <div className="text-3xl font-black text-slate-900">
-                  {college.duration}
+                  {college.duration} years
                 </div>
                 <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Duration</div>
               </div>
@@ -168,11 +169,11 @@ const countryFlag =
                 <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                   <Calendar className="w-8 h-8 text-orange-600" />
                 </div>
-               <div className="text-3xl font-black text-slate-900">
-  {college.createdAt
-    ? new Date(college.createdAt).getFullYear()
-    : "—"}
-</div>
+                <div className="text-3xl font-black text-slate-900">
+                  {college.createdAt
+                    ? new Date(college.createdAt).getFullYear()
+                    : "—"}
+                </div>
 
                 <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Added Year</div>
               </div>
@@ -262,7 +263,7 @@ const countryFlag =
                       </div>
                       <div>
                         <div className="font-black text-slate-900 mb-1">Course Duration</div>
-                        <div className="text-slate-600 font-medium">{college.duration}</div>
+                        <div className="text-slate-600 font-medium">{college.duration} years</div>
                       </div>
                     </div>
                   </div>
@@ -354,7 +355,7 @@ const countryFlag =
 
           {/* Enhanced Sidebar */}
           <div className="space-y-8">
-          
+
 
             {/* Enhanced CTA Card */}
             <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-green-600 to-blue-600">
@@ -375,14 +376,14 @@ const countryFlag =
                       <div className="text-xs text-white/80">Annual Fee</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-black">{college.duration}</div>
+                      <div className="text-2xl font-black">{college.duration} years</div>
                       <div className="text-xs text-white/80">Duration</div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
-                  <Button 
+                  <Button
                     onClick={openModal}
                     className="w-full bg-white text-green-600 hover:bg-green-50 font-black rounded-2xl h-14 group"
                   >
@@ -390,9 +391,9 @@ const countryFlag =
                     Contact Advisor
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
-                  <Button 
+                  <Button
                     onClick={openModal}
-                    variant="outline" 
+                    variant="outline"
                     className="w-full bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 font-black rounded-2xl h-14"
                   >
                     <Mail className="w-5 h-5 mr-2" />
@@ -428,32 +429,32 @@ const countryFlag =
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-slate-100">
                   <span className="text-slate-600 font-medium">Added Date</span>
-<span className="font-black text-slate-900">
-  {college.createdAt
-    ? new Date(college.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-    : "—"}
-</span>
+                  <span className="font-black text-slate-900">
+                    {college.createdAt
+                      ? new Date(college.createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })
+                      : "—"}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center py-3">
                   <span className="text-slate-600 font-medium">Last Updated</span>
-<span className="font-black text-slate-900">
-  {college.createdAt
-    ? new Date(college.createdAt).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-    : "—"}
-</span>
+                  <span className="font-black text-slate-900">
+                    {college.createdAt
+                      ? new Date(college.createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })
+                      : "—"}
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-          
+
 
             {/* Enhanced Contact Info */}
             <Card className="border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2.5rem] overflow-hidden">
@@ -463,16 +464,17 @@ const countryFlag =
               <CardContent className="p-8 space-y-4">
                 <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
                   <Phone className="w-5 h-5 text-green-600" />
-                  <span>+1 (555) 123-4567</span>
+                  <a href={createTelLink(contactInfo.phones.primary)} className="hover:text-green-600 transition-colors">
+                    {contactInfo.phones.primary}
+                  </a>
                 </div>
-                <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
+                {/* <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
                   <Mail className="w-5 h-5 text-blue-600" />
-                  <span>admissions@{college.slug}.edu</span>
-                </div>
-                <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
-                  <Globe className="w-5 h-5 text-purple-600" />
-                  <span>www.{college.slug}.edu</span>
-                </div>
+                  <a href={createMailtoLink(contactInfo.emails.admissions, `Inquiry about ${college.name}`)} className="hover:text-green-600 transition-colors">
+                    {contactInfo.emails.admissions}
+                  </a>
+                </div> */}
+
                 <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
                   <MapPin className="w-5 h-5 text-orange-600" />
                   <span>{countryFlag} {countryName}</span>
@@ -500,7 +502,7 @@ const countryFlag =
               </Button>
             </Link>
           </div>
-          
+
           <RelatedColleges currentCollegeSlug={college.slug} />
         </div>
       </div>
