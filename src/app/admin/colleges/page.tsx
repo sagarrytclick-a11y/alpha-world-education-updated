@@ -115,6 +115,7 @@ export default function CollegesPage() {
 
     if (selectedCountry !== 'all') {
       filtered = filtered.filter(college => {
+        if (!college.country_ref) return false
         const countrySlug = typeof college.country_ref === 'string' 
           ? college.country_ref 
           : college.country_ref.slug
@@ -136,9 +137,11 @@ export default function CollegesPage() {
       key: 'name' as keyof College,
       title: 'College Name',
       render: (value: string, record: College) => {
-        const countryName = typeof record.country_ref === 'string' 
-          ? record.country_ref 
-          : record.country_ref.name
+        const countryName = !record.country_ref 
+          ? 'No country'
+          : typeof record.country_ref === 'string' 
+            ? record.country_ref 
+            : record.country_ref.name || 'Unknown country'
         
         return (
           <div>
@@ -214,9 +217,11 @@ export default function CollegesPage() {
       setFormData({
         name: college.name,
         slug: college.slug,
-        country: typeof college.country_ref === 'string' 
-          ? college.country_ref 
-          : college.country_ref.slug,
+        country: !college.country_ref 
+          ? ''
+          : typeof college.country_ref === 'string' 
+            ? college.country_ref 
+            : college.country_ref.slug || '',
         exams: college.exams,
         fees: college.fees.toString(),
         duration: college.duration,
