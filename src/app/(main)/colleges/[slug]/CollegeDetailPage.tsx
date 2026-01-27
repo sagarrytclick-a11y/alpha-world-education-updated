@@ -109,10 +109,9 @@ const countryFlag =
                 {college.name}
               </h1>
               
-             <p className="text-xl text-white/90 max-w-3xl mb-8 font-medium leading-relaxed">
-  {(college.about_content?.substring(0, 200) ?? "")}...
-</p>
-
+              <p className="text-xl text-white/90 max-w-3xl mb-8 font-medium leading-relaxed">
+                {college.about_content.substring(0, 200)}...
+              </p>
               
               <div className="flex flex-wrap gap-6">
                 <div className="flex items-center text-white">
@@ -143,7 +142,7 @@ const countryFlag =
                   <DollarSign className="w-8 h-8 text-green-600" />
                 </div>
                 <div className="text-3xl font-black text-slate-900">
-                  ${college.fees.toLocaleString()}
+                  ${college.fees ? college.fees.toLocaleString() : 'N/A'}
                 </div>
                 <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Annual Fees</div>
               </div>
@@ -199,7 +198,7 @@ const countryFlag =
               <CardContent className="p-8">
                 <div className="prose prose-lg max-w-none">
                   <p className="text-slate-600 leading-relaxed text-lg font-medium">
-                    {college.about_content}
+                    {college.about_content || 'No description available'}
                   </p>
                 </div>
               </CardContent>
@@ -274,7 +273,7 @@ const countryFlag =
                       </div>
                       <div>
                         <div className="font-black text-slate-900 mb-1">Annual Fees</div>
-                        <div className="text-slate-600 font-medium">${college.fees.toLocaleString()}/year</div>
+                        <div className="text-slate-600 font-medium">${college.fees ? college.fees.toLocaleString() : 'N/A'}/year</div>
                       </div>
                     </div>
                     <div className="flex items-start gap-4">
@@ -372,7 +371,7 @@ const countryFlag =
                   </p>
                   <div className="mt-4 flex items-center justify-center gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-black">${college.fees.toLocaleString()}</div>
+                      <div className="text-2xl font-black">${college.fees ? college.fees.toLocaleString() : 'N/A'}</div>
                       <div className="text-xs text-white/80">Annual Fee</div>
                     </div>
                     <div className="text-center">
