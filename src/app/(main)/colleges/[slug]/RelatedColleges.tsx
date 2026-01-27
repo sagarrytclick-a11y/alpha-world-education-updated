@@ -5,6 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { getCountryName } from "@/lib/normalize"
+
 import { Button } from '@/components/ui/button'
 import { 
   MapPin, 
@@ -101,17 +103,18 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {colleges.map((college) => {
         const country = college.country_ref
-        const countryName = typeof country === 'object' ? country.name : country
+      const countryName = getCountryName(college.country_ref)
+
         const countryFlag = typeof country === 'object' ? country.flag : ''
 
         return (
           <Card key={college._id} className="group hover:shadow-lg transition-shadow">
             <div className="relative h-48 overflow-hidden rounded-t-lg">
               {college.banner_url ? (
-                <Image
+                <img
                   src={college.banner_url}
                   alt={college.name}
-                  fill
+                  
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (

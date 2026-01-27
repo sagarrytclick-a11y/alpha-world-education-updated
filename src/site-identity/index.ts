@@ -85,7 +85,7 @@ export const SITE_IDENTITY: SiteIdentity = {
       general: "Info@alphaworldeducation.com",
     },
     address: {
-      office: "4th floor, iThum-Noida, iThum Tower, C-405, Sector 62",
+      office: "Third Floor, US Complex Jasola Opp Apollo Hospital , New Delhi, Delhi, India - 110076",
       city: "Noida",
       country: "Uttar Pradesh 201301",
       mapLink: "https://goo.gl/maps/example",

@@ -55,9 +55,19 @@ interface CollegeDetailPageProps {
 
 export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
   const { openModal } = useFormModal();
+  // const country = college.country_ref
   const country = college.country_ref
-  const countryName = typeof country === 'object' ? country.name : country
-  const countryFlag = typeof country === 'object' ? country.flag : ''
+
+const countryName =
+  country && typeof country === "object"
+    ? country.name
+    : country || ""
+
+const countryFlag =
+  country && typeof country === "object"
+    ? country.flag
+    : ""
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -99,9 +109,10 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                 {college.name}
               </h1>
               
-              <p className="text-xl text-white/90 max-w-3xl mb-8 font-medium leading-relaxed">
-                {college.about_content.substring(0, 200)}...
-              </p>
+             <p className="text-xl text-white/90 max-w-3xl mb-8 font-medium leading-relaxed">
+  {(college.about_content?.substring(0, 200) ?? "")}...
+</p>
+
               
               <div className="flex flex-wrap gap-6">
                 <div className="flex items-center text-white">
@@ -158,9 +169,12 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                 <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                   <Calendar className="w-8 h-8 text-orange-600" />
                 </div>
-                <div className="text-3xl font-black text-slate-900">
-                  {new Date(college.createdAt).getFullYear()}
-                </div>
+               <div className="text-3xl font-black text-slate-900">
+  {college.createdAt
+    ? new Date(college.createdAt).getFullYear()
+    : "—"}
+</div>
+
                 <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Added Year</div>
               </div>
             </div>
@@ -415,11 +429,27 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-slate-100">
                   <span className="text-slate-600 font-medium">Added Date</span>
-                  <span className="font-black text-slate-900">{new Date(college.createdAt).toLocaleDateString()}</span>
+<span className="font-black text-slate-900">
+  {college.createdAt
+    ? new Date(college.createdAt).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "—"}
+</span>
                 </div>
                 <div className="flex justify-between items-center py-3">
                   <span className="text-slate-600 font-medium">Last Updated</span>
-                  <span className="font-black text-slate-900">{new Date(college.updatedAt).toLocaleDateString()}</span>
+<span className="font-black text-slate-900">
+  {college.createdAt
+    ? new Date(college.createdAt).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+    : "—"}
+</span>
                 </div>
               </CardContent>
             </Card>
