@@ -274,7 +274,9 @@ const countryFlag =
                       </div>
                       <div>
                         <div className="font-black text-slate-900 mb-1">Annual Fees</div>
-                        <div className="text-slate-600 font-medium">${college.fees.toLocaleString()}/year</div>
+<div className="text-3xl font-black text-slate-900">
+  ₹{college.fees.toLocaleString("en-US")}
+</div>
                       </div>
                     </div>
                     <div className="flex items-start gap-4">
