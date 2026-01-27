@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { getCountrySlug } from "@/lib/normalize"
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { getCountryName } from "@/lib/normalize"
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -37,25 +39,34 @@ export default function CollegesPage() {
 
   useEffect(() => { fetchColleges() }, [])
 
-  useEffect(() => {
-    let filtered = colleges
-    if (selectedCountry !== 'all') {
-      filtered = filtered.filter(college => {
-        const countrySlug = typeof college.country_ref === 'string' ? college.country_ref : college.country_ref.slug
-        return countrySlug === selectedCountry
-      })
-    }
-    if (selectedExam !== 'all') {
-      filtered = filtered.filter(college => college.exams.includes(selectedExam))
-    }
-    if (searchTerm) {
-      filtered = filtered.filter(college => 
-        college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        college.about_content.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
-    setFilteredColleges(filtered)
-  }, [colleges, searchTerm, selectedCountry, selectedExam])
+
+
+useEffect(() => {
+  let filtered = colleges
+
+  if (selectedCountry !== "all") {
+    filtered = filtered.filter(college => {
+      const countrySlug = getCountrySlug(college.country_ref)
+      return countrySlug === selectedCountry
+    })
+  }
+
+  if (selectedExam !== "all") {
+    filtered = filtered.filter(college =>
+      college.exams.includes(selectedExam)
+    )
+  }
+
+  if (searchTerm) {
+    filtered = filtered.filter(college =>
+      college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      college.about_content.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }
+
+  setFilteredColleges(filtered)
+}, [colleges, searchTerm, selectedCountry, selectedExam])
+
 
   const fetchColleges = async () => {
     try {
@@ -73,7 +84,21 @@ export default function CollegesPage() {
     }
   }
 
-  const countries = [...new Set(colleges.map(college => typeof college.country_ref === 'string' ? college.country_ref : college.country_ref.name))]
+const countries = [
+  ...new Set(
+    colleges
+      .map(college => {
+        const c = college.country_ref
+
+        if (!c) return null                 // handles null / undefined
+        if (typeof c === "string") return c
+        if (typeof c === "object") return c.name ?? null
+
+        return null
+      })
+      .filter(Boolean) // remove nulls
+  ),
+]
   const exams = [...new Set(colleges.flatMap(college => college.exams))]
 
   if (loading) {
@@ -192,9 +217,9 @@ export default function CollegesPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
                     
                     <div className="absolute top-4 left-4">
-                      <Badge className="bg-white/90 backdrop-blur-md text-green-700 hover:bg-white border-none px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm">
-                        {typeof college.country_ref === 'string' ? college.country_ref : college.country_ref.name}
-                      </Badge>
+                     <Badge className="bg-white/90 backdrop-blur-md text-green-700 hover:bg-white border-none px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm">
+  {getCountryName(college.country_ref)}
+</Badge>
                     </div>
 
                     <div className="absolute bottom-4 left-4 right-4">
