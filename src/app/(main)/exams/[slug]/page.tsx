@@ -20,7 +20,8 @@ import {
   BookOpen,
   Target,
   CheckCircle,
-  MapPin
+  MapPin,
+  ArrowRight
 } from 'lucide-react'
 
 interface Country {
@@ -281,12 +282,13 @@ const ExamPage = () => {
               >
                 Get Expert Guidance
               </Button>
-              <Button 
-                variant="outline" 
-                className="border-white/20 bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl h-14 px-8 text-lg"
+              <Link 
+               href={'/blogs'}
+                className="border-white/20 flex items-center gap-2 justify-center bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl h-14 px-8 text-lg"
               >
-                Download Study Guide
-              </Button>
+                Explore Latest Blogs
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
             </div>
           </CardContent>
         </Card>

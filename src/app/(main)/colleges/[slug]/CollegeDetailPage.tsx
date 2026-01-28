@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFormModal } from '@/context/FormModalContext'
+import { useContactInfo, createMailtoLink, createTelLink } from '@/hooks/useContactInfo'
 import {
   MapPin,
   GraduationCap,
@@ -55,11 +56,12 @@ interface CollegeDetailPageProps {
 
 export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
   const { openModal } = useFormModal();
-  // const country = college.country_ref
+  const contactInfo = useContactInfo();
   const country = college.country_ref
 
   const countryName =
     country && typeof country === "object"
+    typeof country === "object"
       ? country.name
       : country || ""
 
@@ -114,6 +116,9 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
               </p>
 
 
+                {college.about_content.substring(0, 200)}...
+              </p>
+
               <div className="flex flex-wrap gap-6">
                 <div className="flex items-center text-white">
                   <Calendar className="w-5 h-5 mr-3 text-green-400" />
@@ -121,7 +126,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                 </div>
                 <div className="flex items-center text-white">
                   <Clock className="w-5 h-5 mr-3 text-blue-400" />
-                  <span className="font-bold">{college.duration}</span>
+                  <span className="font-bold">{college.duration} years</span>
                 </div>
                 <div className="flex items-center text-white">
                   <Award className="w-5 h-5 mr-3 text-yellow-400" />
@@ -143,7 +148,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                   <DollarSign className="w-8 h-8 text-green-600" />
                 </div>
                 <div className="text-3xl font-black text-slate-900">
-                  ${college.fees.toLocaleString()}
+                  ${college.fees ? college.fees.toLocaleString() : 'N/A'}
                 </div>
                 <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Annual Fees</div>
               </div>
@@ -152,7 +157,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                   <Clock className="w-8 h-8 text-blue-600" />
                 </div>
                 <div className="text-3xl font-black text-slate-900">
-                  {college.duration}
+                  {college.duration} years
                 </div>
                 <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">Duration</div>
               </div>
@@ -199,7 +204,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
               <CardContent className="p-8">
                 <div className="prose prose-lg max-w-none">
                   <p className="text-slate-600 leading-relaxed text-lg font-medium">
-                    {college.about_content}
+                    {college.about_content || 'No description available'}
                   </p>
                 </div>
               </CardContent>
@@ -263,7 +268,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                       </div>
                       <div>
                         <div className="font-black text-slate-900 mb-1">Course Duration</div>
-                        <div className="text-slate-600 font-medium">{college.duration}</div>
+                        <div className="text-slate-600 font-medium">{college.duration} years</div>
                       </div>
                     </div>
                   </div>
@@ -277,6 +282,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                         <div className="text-3xl font-black text-slate-900">
                           ₹{college.fees.toLocaleString("en-US")}
                         </div>
+                        <div className="text-slate-600 font-medium">${college.fees ? college.fees.toLocaleString() : 'N/A'}/year</div>
                       </div>
                     </div>
                     <div className="flex items-start gap-4">
@@ -374,11 +380,11 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                   </p>
                   <div className="mt-4 flex items-center justify-center gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-black">${college.fees.toLocaleString()}</div>
+                      <div className="text-2xl font-black">${college.fees ? college.fees.toLocaleString() : 'N/A'}</div>
                       <div className="text-xs text-white/80">Annual Fee</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-black">{college.duration}</div>
+                      <div className="text-2xl font-black">{college.duration} years</div>
                       <div className="text-xs text-white/80">Duration</div>
                     </div>
                   </div>
@@ -466,16 +472,17 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
               <CardContent className="p-8 space-y-4">
                 <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
                   <Phone className="w-5 h-5 text-green-600" />
-                  <span>+1 (555) 123-4567</span>
+                  <a href={createTelLink(contactInfo.phones.primary)} className="hover:text-green-600 transition-colors">
+                    {contactInfo.phones.primary}
+                  </a>
                 </div>
-                <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
+                {/* <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
                   <Mail className="w-5 h-5 text-blue-600" />
-                  <span>admissions@{college.slug}.edu</span>
-                </div>
-                <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
-                  <Globe className="w-5 h-5 text-purple-600" />
-                  <span>www.{college.slug}.edu</span>
-                </div>
+                  <a href={createMailtoLink(contactInfo.emails.admissions, `Inquiry about ${college.name}`)} className="hover:text-green-600 transition-colors">
+                    {contactInfo.emails.admissions}
+                  </a>
+                </div> */}
+
                 <div className="flex items-center gap-4 text-slate-600 font-medium p-3 bg-slate-50 rounded-xl">
                   <MapPin className="w-5 h-5 text-orange-600" />
                   <span>{countryFlag} {countryName}</span>
