@@ -7,22 +7,66 @@ export async function GET(request: Request) {
   try {
     await connectDB();
     const { searchParams } = new URL(request.url);
-    const countryId = searchParams.get('country');
     
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '12');
+    const search = searchParams.get('search');
+    const countrySlug = searchParams.get('country');
+    const exam = searchParams.get('exam');
+    
+    const skip = (page - 1) * limit;
+    
+    // Build query
     const query: Record<string, unknown> = { is_active: true };
-    if (countryId) {
-      query.country_ref = countryId;
+    
+    // Search by name or about content
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { about_content: { $regex: search, $options: 'i' } }
+      ];
     }
     
+    // Filter by country
+    if (countrySlug && countrySlug !== 'all') {
+      const country = await Country.findOne({ slug: countrySlug, is_active: true });
+      if (country) {
+        query.country_ref = country._id;
+      } else {
+        return NextResponse.json({
+          success: true,
+          message: "Colleges fetched successfully",
+          data: { colleges: [], total: 0 },
+        });
+      }
+    }
+    
+    // Filter by exam
+    if (exam && exam !== 'all') {
+      query.exams = { $in: [exam] };
+    }
+    
+    // Get total count for pagination
+    const total = await College.countDocuments(query);
+    
+    // Fetch paginated results
     const colleges = await College.find(query)
       .populate('country_ref', 'name slug flag')
       .sort({ ranking: 1, name: 1 })
-      .limit(20);
+      .skip(skip)
+      .limit(limit);
     
     return NextResponse.json({
       success: true,
       message: "Colleges fetched successfully",
-      data: colleges,
+      data: {
+        colleges,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: skip + limit < total
+      },
     });
   } catch (error) {
     console.error("Error fetching colleges:", error);

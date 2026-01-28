@@ -39,7 +39,7 @@ const CollegeSlider: React.FC<CollegeSliderProps> = ({ countryId }) => {
         const result = await response.json()
         
         if (result.success) {
-          setColleges(result.data)
+          setColleges(result.data.colleges || [])
         } else {
           console.error('Failed to fetch colleges:', result.message)
         }

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFormModal } from '@/context/FormModalContext'
+import FAQ from "@/app/Components/FAQ"
 import {
   MapPin,
   GraduationCap,
@@ -530,6 +531,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
           <RelatedColleges currentCollegeSlug={college.slug} />
         </div>
       </div>
+      <FAQ />
     </div>
   )
 }

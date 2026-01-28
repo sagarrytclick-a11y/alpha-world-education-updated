@@ -53,9 +53,9 @@ export function useDropdownData(): DropdownData {
         ])
 
         setData({
-          colleges: collegesData.success ? collegesData.data.slice(0, 8) : [],
+          colleges: collegesData.success ? collegesData.data.colleges?.slice(0, 8) || [] : [],
           exams: examsData.success ? examsData.data.slice(0, 6) : [],
-          countries: countriesData.success ? countriesData.data.slice(0, 6) : [],
+          countries: countriesData.success ? countriesData.data : [],
           loading: false,
           error: null
         })
