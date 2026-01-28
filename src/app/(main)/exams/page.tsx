@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Search, Globe, Calendar, Building, Clock, FileText, ArrowRight, X, LayoutGrid } from 'lucide-react'
+import FAQ from "@/app/Components/FAQ"
 
 interface Exam {
   _id: string
@@ -243,6 +244,7 @@ export default function ExamsPage() {
           )}
         </div>
       </div>
+      <FAQ />
     </div>
   )
 }

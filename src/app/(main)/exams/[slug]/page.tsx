@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useFormModal } from '@/context/FormModalContext'
+import FAQ from "@/app/Components/FAQ"
 import { 
   Calendar,
   Globe,
@@ -293,6 +294,7 @@ const ExamPage = () => {
           </CardContent>
         </Card>
       </div>
+      <FAQ />
     </div>
   )
 }

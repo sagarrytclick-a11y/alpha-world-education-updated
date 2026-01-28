@@ -4,6 +4,7 @@ import AlphaWorldAdvantage from "@/app/Components/AdvantageCard";
 import CtaSection from "@/app/Components/CtaSection";
 import DestinationHighlights from "@/app/Components/DestinationHighlights";
 import EducationStats from "@/app/Components/EducationStats";
+import FAQ from "@/app/Components/FAQ";
 import FeaturedSection from "@/app/Components/FeaturedExams";
 import Hero from "@/app/Components/Hero";
 import { InfiniteMovingCardsDemo } from "@/app/Components/InfiniteMovingCardsDemo";
@@ -28,6 +29,7 @@ const page = () => {
       <AlphaWorldAdvantage />
       <ProcessJourney />
       <StudentTestimonials />
+      <FAQ />
       <InfiniteMovingCardsDemo />
       <CtaSection />
     </div>

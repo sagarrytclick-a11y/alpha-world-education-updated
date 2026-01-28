@@ -466,7 +466,7 @@ export default function FeaturedSection() {
 
         // Transform and set universities data
         if (uniData.success) {
-          const transformedUniversities = uniData.data.map((u: any) => ({
+          const transformedUniversities = uniData.data.colleges?.map((u: any) => ({
             name: u.name,
             image: u.banner_url,
             location: u.city,
@@ -477,7 +477,7 @@ export default function FeaturedSection() {
             slug: u.slug,
             country: u.country_ref?.name,
             about: u.about_content
-          }));
+          })) || [];
 
           setAllUniversities(transformedUniversities);
           setUniversities(transformedUniversities.slice(0, 6));

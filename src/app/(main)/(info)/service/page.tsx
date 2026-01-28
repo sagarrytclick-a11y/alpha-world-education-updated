@@ -12,6 +12,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
+import FAQ from "@/app/Components/FAQ";
 
 // Animated Counter Component
 const AnimatedCounter = ({ end, duration = 2000, suffix = '', prefix = '' }: {
@@ -479,6 +480,7 @@ const ServicesPage = () => {
           </div>
         </section>
       </div>
+      <FAQ />
     </div>
   );
 };

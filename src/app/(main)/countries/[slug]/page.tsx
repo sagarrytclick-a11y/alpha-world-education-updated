@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import CollegeSlider from '@/components/CollegeSlider'
 import { useFormModal } from '@/context/FormModalContext'
+import FAQ from "@/app/Components/FAQ"
 import { 
   MapPin, 
   Globe, 
@@ -217,6 +218,7 @@ const CountryPage = () => {
 
       {/* Colleges Slider Section */}
       <CollegeSlider />
+      <FAQ />
     </div>
   )
 }
