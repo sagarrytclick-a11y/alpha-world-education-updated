@@ -1,12 +1,12 @@
-'use client'
-
 import React from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
+import CollegeCTA from "./collegeCTA"
+
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFormModal } from '@/context/FormModalContext'
-import FAQ from "@/app/Components/FAQ"
 import {
   MapPin,
   GraduationCap,
@@ -51,34 +51,11 @@ interface College {
 }
 
 interface CollegeDetailPageProps {
-  college?: College | null
+  college: College
 }
 
 export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
-  // Add null check to prevent undefined errors
-  if (!college) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">⚠️</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">College Not Found</h1>
-          <p className="text-slate-500 mb-6">
-            The college you're looking for doesn't exist or has been removed.
-          </p>
-          <Link 
-            href="/colleges"
-            className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-green-700 transition-colors"
-          >
-            ← Back to Colleges
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  const { openModal } = useFormModal();
+  // const { openModal } = useFormModal();
   // const country = college.country_ref
   const country = college.country_ref
 
@@ -409,7 +386,7 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                 </div>
 
                 <div className="space-y-4">
-                  <Button
+                  {/* <Button
                     onClick={openModal}
                     className="w-full bg-white text-green-600 hover:bg-green-50 font-black rounded-2xl h-14 group"
                   >
@@ -424,7 +401,8 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
                   >
                     <Mail className="w-5 h-5 mr-2" />
                     Request Information
-                  </Button>
+                  </Button> */}
+                  <CollegeCTA />
                 </div>
               </CardContent>
             </Card>
@@ -531,7 +509,6 @@ export default function CollegeDetailPage({ college }: CollegeDetailPageProps) {
           <RelatedColleges currentCollegeSlug={college.slug} />
         </div>
       </div>
-      <FAQ />
     </div>
   )
 }
