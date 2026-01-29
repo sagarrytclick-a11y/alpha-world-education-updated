@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useFormModal } from '@/context/FormModalContext'
 import FAQ from "@/app/Components/FAQ"
+import { SITE_CONTACT } from '@/config/site-config'
+import { useContactInfo } from "@/hooks/useContactInfo";
+
 import {
   MapPin,
   GraduationCap,
@@ -61,22 +64,24 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
   const [error, setError] = useState<string | null>(null)
   const { openModal } = useFormModal()
 
+  const { phones, emails } = useContactInfo();
+
   useEffect(() => {
     const fetchCollege = async () => {
       try {
         setLoading(true)
         setError(null)
-        
+
         const response = await fetch(`/api/colleges/${slug}`)
         const result = await response.json()
-        
+
         if (!result.success) {
           if (response.status === 404) {
             notFound()
           }
           throw new Error(result.message || 'Failed to fetch college')
         }
-        
+
         setCollege(result.data)
       } catch (error) {
         console.error('Error fetching college:', error)
@@ -201,7 +206,7 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                     </div>
                     <div>
                       <h4 className="font-black text-slate-900 text-lg mb-1">Program Duration</h4>
-                      <p className="text-xl font-bold text-blue-600">{college.duration}</p>
+                      <p className="text-xl font-bold text-blue-600">{college.duration} years</p>
                     </div>
                   </div>
                   {college.establishment_year && (
@@ -285,11 +290,11 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-green-600" />
-                    <span className="text-slate-700 font-medium">Admission Helpline</span>
+                    <span className="text-slate-700 font-medium">{phones.primary}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-green-600" />
-                    <span className="text-slate-700 font-medium">info@alphaworld.com</span>
+                    <span className="text-slate-700 font-medium">{emails.info}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Globe className="w-5 h-5 text-green-600" />
@@ -306,7 +311,7 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
           <RelatedColleges currentCollegeSlug={college.slug} />
         </div>
       </div>
-      
+
       <FAQ />
     </div>
   )

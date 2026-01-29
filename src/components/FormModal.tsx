@@ -78,10 +78,10 @@ export const FormModal: React.FC = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-4 sm:space-y-5">
           {[
-            { id: 'name', label: 'Full Name', type: 'text', placeholder: 'John Doe', value: formData.name },
-            { id: 'email', label: 'Email Address', type: 'email', placeholder: 'john@example.com', value: formData.email },
-            { id: 'number', label: 'Phone Number', type: 'tel', placeholder: '+1 (555) 123-4567', value: formData.number },
-            { id: 'city', label: 'City', type: 'text', placeholder: 'New York', value: formData.city }
+            { id: 'name', label: 'Full Name', type: 'text', placeholder: 'Name', value: formData.name },
+            { id: 'email', label: 'Email Address', type: 'email', placeholder: 'example@gmail.com', value: formData.email },
+            { id: 'number', label: 'Phone Number', type: 'tel', placeholder: '+91 XXXXXXXXXX', value: formData.number },
+            { id: 'city', label: 'City', type: 'text', placeholder: 'City', value: formData.city }
           ].map((field) => (
             <div key={field.id}>
               <label htmlFor={field.id} className="block text-xs sm:text-sm font-bold text-slate-700 mb-2 ml-1">

@@ -40,7 +40,7 @@ export default function CollegesPage() {
   const [selectedExam, setSelectedExam] = useState<string>('all')
   const [totalCount, setTotalCount] = useState(0)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
-  
+
   const observer = useRef<IntersectionObserver | null>(null)
   const lastCollegeRef = useRef<HTMLDivElement>(null)
 
@@ -97,7 +97,7 @@ export default function CollegesPage() {
   const fetchColleges = async (pageNum: number, isNewSearch: boolean = false) => {
     try {
       setLoading(true)
-      
+
       const params = new URLSearchParams({
         page: pageNum.toString(),
         limit: '12',
@@ -108,11 +108,11 @@ export default function CollegesPage() {
 
       const response = await fetch(`/api/colleges?${params}`)
       const result = await response.json()
-      
+
       if (result.success) {
         const newColleges = result.data.colleges || []
         const total = result.data.total || 0
-        
+
         if (isNewSearch) {
           setColleges(newColleges)
           setFilteredColleges(newColleges)
@@ -120,7 +120,7 @@ export default function CollegesPage() {
           setColleges(prev => [...prev, ...newColleges])
           setFilteredColleges(prev => [...prev, ...newColleges])
         }
-        
+
         setTotalCount(total)
         setHasMore(newColleges.length === 12 && colleges.length + newColleges.length < total)
       }
@@ -131,21 +131,21 @@ export default function CollegesPage() {
     }
   }
 
-const countries = [
-  ...new Set(
-    colleges
-      .map(college => {
-        const c = college.country_ref
+  const countries = [
+    ...new Set(
+      colleges
+        .map(college => {
+          const c = college.country_ref
 
-        if (!c) return null                 // handles null / undefined
-        if (typeof c === "string") return c
-        if (typeof c === "object") return c.name ?? null
+          if (!c) return null                 // handles null / undefined
+          if (typeof c === "string") return c
+          if (typeof c === "object") return c.name ?? null
 
-        return null
-      })
-      .filter(Boolean) // remove nulls
-  ),
-]
+          return null
+        })
+        .filter(Boolean) // remove nulls
+    ),
+  ]
   const exams = [...new Set(colleges.flatMap(college => college.exams))]
 
   if (loading && colleges.length === 0) {
@@ -203,7 +203,7 @@ const countries = [
                 className="pl-12 bg-slate-50 border-none h-12 rounded-xl focus-visible:ring-2 focus-visible:ring-green-500 font-medium pointer-events-auto"
               />
             </div>
-            
+
             <Select value={selectedCountry} onValueChange={setSelectedCountry}>
               <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-green-500 font-medium pointer-events-auto">
                 <SelectValue placeholder="Country" />
@@ -228,8 +228,8 @@ const countries = [
               </SelectContent>
             </Select>
 
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => { setSearchTerm(''); setSelectedCountry('all'); setSelectedExam('all'); }}
               className="h-12 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-xl font-bold flex gap-2 pointer-events-auto"
             >
@@ -251,85 +251,85 @@ const countries = [
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredColleges.map((college, index) => (
-                <div 
-                  key={college._id} 
+                <div
+                  key={college._id}
                   ref={index === filteredColleges.length - 1 ? lastCollegeRef : null}
                 >
-                  <Card className="group border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
-                  {/* Image Header */}
-                  <div className="relative h-56 w-full overflow-hidden">
-                    <img
-                      src={college.banner_url || `https://picsum.photos/seed/${college.slug}/600/400`}
-                      alt={college.name}
-                      width={600}
-                      height={400}
-                      className="object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
-                    
-                    <div className="absolute top-4 left-4">
-                     <Badge className="bg-white/90 backdrop-blur-md text-green-700 hover:bg-white border-none px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm">
-  {getCountryName(college.country_ref)}
-</Badge>
-                    </div>
+                  <Card className="group border-none py-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
+                    {/* Image Header */}
+                    <div className="relative h-56 w-full overflow-hidden">
+                      <img
+                        src={college.banner_url || `https://picsum.photos/seed/${college.slug}/600/400`}
+                        alt={college.name}
+                        width={600}
+                        height={400}
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
 
-                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="absolute top-4 left-4">
+                        <Badge className="bg-white/90 backdrop-blur-md text-green-700 hover:bg-white border-none px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm">
+                          {getCountryName(college.country_ref)}
+                        </Badge>
+                      </div>
+
+                      <div className="absolute bottom-4 left-4 right-4">
                         <div className="flex items-center gap-2 text-white">
-                            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-lg">
-                                <Building size={16} />
-                            </div>
-                            <h3 className="font-bold text-lg line-clamp-1 leading-tight group-hover:text-green-400 transition-colors">
-                                {college.name}
-                            </h3>
-                        </div>
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-6 flex flex-col flex-grow">
-                    <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 mb-6 font-medium italic">
-                      "{college.about_content}"
-                    </p>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Yearly Fees</span>
-                        <div className="flex items-center text-green-600 font-black text-lg">
-                          <DollarSign size={16} />
-                          <span>{college.fees.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</span>
-                        <div className="flex items-center text-slate-700 font-black text-lg">
-                          <Clock size={16} className="mr-1 text-slate-400" />
-                          <span>{college.duration}</span>
+                          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center shadow-lg">
+                            <Building size={16} />
+                          </div>
+                          <h3 className="font-bold text-lg line-clamp-1 leading-tight group-hover:text-green-400 transition-colors">
+                            {college.name}
+                          </h3>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 mb-8">
-                      {college.exams.slice(0, 3).map((exam) => (
-                        <span key={exam} className="text-[10px] font-bold bg-slate-50 text-slate-600 px-3 py-1 rounded-lg border border-slate-100">
-                          {exam}
-                        </span>
-                      ))}
-                    </div>
+                    <CardContent className="p-6 flex flex-col flex-grow">
+                      <p className="text-slate-500 text-sm leading-relaxed line-clamp-2 mb-6 font-medium italic">
+                        "{college.about_content}"
+                      </p>
 
-                    <div className="mt-auto">
-                      <Link href={`/colleges/${college.slug}`}>
-                        <Button className="w-full h-14 bg-slate-900 hover:bg-green-600 text-white font-black rounded-2xl transition-all duration-300 group/btn flex items-center justify-center gap-2">
-                          View Program Details
-                          <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Yearly Fees</span>
+                          <div className="flex items-center text-green-600 font-black text-lg">
+                            <DollarSign size={16} />
+                            <span>{college.fees.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</span>
+                          <div className="flex items-center text-slate-700 font-black text-lg">
+                            <Clock size={16} className="mr-1 text-slate-400" />
+                            <span>{college.duration} years</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-8">
+                        {college.exams.slice(0, 3).map((exam) => (
+                          <span key={exam} className="text-[10px] font-bold bg-slate-50 text-slate-600 px-3 py-1 rounded-lg border border-slate-100">
+                            {exam}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="mt-auto">
+                        <Link href={`/colleges/${college.slug}`}>
+                          <Button className="w-full h-14 bg-slate-900 hover:bg-green-600 text-white font-black rounded-2xl transition-all duration-300 group/btn flex items-center justify-center gap-2">
+                            View Program Details
+                            <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               ))}
             </div>
           )}
-          
+
           {/* Loading indicator for infinite scroll */}
           {loading && colleges.length > 0 && (
             <div className="flex justify-center py-8">
@@ -339,7 +339,7 @@ const countries = [
               </div>
             </div>
           )}
-          
+
           {/* End of results indicator */}
           {!hasMore && colleges.length > 0 && (
             <div className="text-center py-8">

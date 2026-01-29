@@ -123,7 +123,7 @@ const Footer = () => {
                 </a>
               </div>
               <div className="flex items-start gap-3 text-gray-300 text-[15px]">
-                <MapPin size={40} className="text-green-400 mt-1" />
+                <MapPin size={50} className="text-green-400 mt-1" />
                 <span className="leading-relaxed">{address.full}</span>
               </div>
             </div>
