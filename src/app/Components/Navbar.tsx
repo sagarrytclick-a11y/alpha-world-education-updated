@@ -16,7 +16,6 @@ export default function Navbar() {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [countryColleges, setCountryColleges] = useState<any[]>([]);
   const [loadingColleges, setLoadingColleges] = useState(false);
-  
   const { emails, phones, address } = useContactInfo();
   const pathname = usePathname();
   const { openModal } = useFormModal();
@@ -69,11 +68,11 @@ export default function Navbar() {
   const dropdownContent = {
     Colleges: colleges.map(c => ({ title: c.name, href: `/colleges/${c.slug}` })),
     Exams: exams.map(e => ({ title: e.short_name, href: `/exams/${e.slug}` })),
-    Countries: countries.map(c => ({ 
-      title: `Study in ${c.name}`, 
-      href: `/countries/${c.slug}`, 
+    Countries: countries.map(c => ({
+      title: `Study in ${c.name}`,
+      href: `/countries/${c.slug}`,
       flag: c.flag,
-      slug: c.slug 
+      slug: c.slug
     })),
   };
 
@@ -81,7 +80,7 @@ export default function Navbar() {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/98 backdrop-blur-lg shadow-xl" : "bg-white/90 backdrop-blur-sm shadow-sm"}`}>
-      
+
       {/* TOP CONTACT BAR */}
       <div className="hidden bg-slate-900 text-white lg:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-3 text-sm">
@@ -102,17 +101,17 @@ export default function Navbar() {
             {/* DESKTOP NAVIGATION */}
             <nav className="hidden lg:flex items-center space-x-2">
               {navItems.map((item) => (
-                <div 
-                  key={item.name} 
-                  className="relative py-2" 
-                  onMouseEnter={() => setHoveredItem(item.name)} 
+                <div
+                  key={item.name}
+                  className="relative py-2"
+                  onMouseEnter={() => setHoveredItem(item.name)}
                   onMouseLeave={() => { setHoveredItem(null); setHoveredCountry(null); }}
                 >
                   <Link href={item.href} className={`px-4 py-3 text-base font-semibold rounded-xl flex items-center gap-2 transition-all duration-200 ${isActive(item.href) ? "text-green-600 bg-green-50 shadow-sm" : "text-slate-700 hover:text-green-600 hover:bg-slate-50"}`}>
                     {item.name}
                     {item.hasDropdown && <ChevronDown size={16} className="transition-transform duration-200" />}
                   </Link>
-                  
+
                   {/* MAIN DROPDOWN - TWO COLUMN LAYOUT */}
                   {item.hasDropdown && hoveredItem === item.name && (
                     <div className={`absolute top-full left-1/2 transform -translate-x-1/2 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-[60] max-h-[60vh] overflow-x-auto overflow-y-hidden ${item.name === 'Countries' ? 'w-[40rem] max-w-[80vw]' : 'w-64 max-w-[90vw]'}`}>
@@ -123,12 +122,12 @@ export default function Navbar() {
                           {/* LEFT COLUMN - COUNTRIES */}
                           <div className="w-1/2 border-r border-slate-100 overflow-y-auto custom-scrollbar max-h-[55vh]">
                             {dropdownContent[item.name as keyof typeof dropdownContent].map((dropdownItem: any) => (
-                              <div 
+                              <div
                                 key={dropdownItem.title}
                                 className="relative group"
                               >
                                 <button
-                                  onClick={() => { 
+                                  onClick={() => {
                                     if (item.name === 'Countries') {
                                       setHoveredCountry(hoveredCountry === dropdownItem.slug ? null : dropdownItem.slug);
                                     }
@@ -141,7 +140,7 @@ export default function Navbar() {
                                   </span>
                                   {item.name === 'Countries' && <ChevronRight size={12} className="text-slate-400" />}
                                 </button>
-                                
+
                                 {/* GREEN SCROLL INDICATOR FOR ACTIVE COUNTRY */}
                                 {item.name === 'Countries' && hoveredCountry === dropdownItem.slug && (
                                   <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-green-500 rounded-l-full"></div>
@@ -149,14 +148,14 @@ export default function Navbar() {
                               </div>
                             ))}
                           </div>
-                          
+
                           {/* RIGHT COLUMN - UNIVERSITIES */}
                           {item.name === 'Countries' && hoveredCountry && (
                             <div className="w-1/2 overflow-y-auto custom-scrollbar max-h-[55vh]">
                               <div className="px-4 pb-2 mb-2 border-b border-slate-100 sticky top-0 bg-white z-10">
                                 <span className="text-sm font-bold text-slate-600 uppercase tracking-wider">Available Universities</span>
                               </div>
-                              
+
                               <div className="px-2">
                                 {loadingColleges ? (
                                   <div className="px-4 py-3 text-sm text-slate-500 flex items-center gap-2 justify-center">
