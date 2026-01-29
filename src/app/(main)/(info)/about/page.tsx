@@ -42,26 +42,67 @@ const experts: Expert[] = [
   { name: "Priya Patel", role: "Student Success Lead", image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=500&fit=crop" },
 ];
 
-const values: Value[] = [
+const values = [
   {
-    icon: <ShieldCheck className="w-8 h-8" />,
-    title: "Trust & Integrity",
-    description: "We build lasting relationships based on transparency, honesty, and ethical practices."
+    title: "Integrity in Every Recommendation",
+    description:
+      "We believe education decisions shape lives. Our guidance is driven by honesty, transparency, and what is truly best for the student — not commissions or shortcuts.",
+    subtext:
+      "This principle has earned us trust across generations of students and parents."
   },
   {
-    icon: <GraduationCap className="w-8 h-8" />,
-    title: "Excellence in Education",
-    description: "We are committed to helping students achieve their highest academic potential."
+    title: "Experience-Driven Expertise",
+    description:
+      "With 50+ years in international education counseling, our advice is grounded in real outcomes, evolving regulations, and deep institutional knowledge.",
+    subtext:
+      "Experience allows us to anticipate challenges before they arise."
   },
   {
-    icon: <Globe className="w-8 h-8" />,
-    title: "Global Perspective",
-    description: "We embrace diversity and foster understanding across cultures and borders."
+    title: "Student-Centric Approach",
+    description:
+      "Every student’s journey is unique. We focus on individual goals, academic strengths, financial considerations, and long-term career outcomes.",
+    subtext:
+      "Personalized counseling has been central to our success for decades."
   },
   {
-    icon: <TrendingUp className="w-8 h-8" />,
-    title: "Innovation",
-    description: "We continuously evolve our methods to provide cutting-edge solutions."
+    title: "Long-Term Responsibility",
+    description:
+      "Our role does not end with admissions. We take responsibility for guiding students toward sustainable academic and professional futures.",
+    subtext:
+      "Our legacy is built on student success, not volume."
+  }
+];
+
+const legacyTimeline = [
+  {
+    year: "1974",
+    title: "Foundation Built on Academic Integrity",
+    description:
+      "Established with a singular mission — to provide honest, student-first guidance for overseas education when reliable information was limited."
+  },
+  {
+    year: "1988",
+    title: "National Expansion Across India",
+    description:
+      "Expanded counseling services nationwide, helping thousands of students make informed academic decisions with confidence."
+  },
+  {
+    year: "2002",
+    title: "Global University Partnerships",
+    description:
+      "Built strong partnerships with leading universities across the UK, USA, Canada, Australia, and Europe."
+  },
+  {
+    year: "2012",
+    title: "Trusted by Generations of Families",
+    description:
+      "Became a legacy brand, trusted by students, parents, and institutions across multiple generations."
+  },
+  {
+    year: "Today",
+    title: "50+ Years of Proven Student Success",
+    description:
+      "With five decades of experience, we continue to guide students globally with transparency, expertise, and measurable outcomes."
   }
 ];
 
@@ -71,55 +112,73 @@ export default function AboutPage() {
     <main className="min-h-screen bg-slate-50 text-slate-900 font-sans">
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-12 sm:pb-16 grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-        <div className="space-y-6 sm:space-y-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 text-green-600 text-xs font-bold uppercase tracking-widest">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-600"></span>
-            </span>
-            Our Story
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-[1.1]">
-            Empowering <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-600">
-              Global Futures
-            </span>
-          </h1>
-          <p className="text-slate-500 text-base sm:text-lg max-w-lg leading-relaxed">
-            We are more than consultants; we are architects of your international career.
-            Navigating complexities so you can focus on your future.
-          </p>
-          <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
-            <button onClick={openModal} className="bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all shadow-lg shadow-green-200 text-sm sm:text-base">
-              Explore Our Story
-            </button>
-            {/* <button className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-4 font-semibold text-slate-700 hover:text-green-600 transition text-sm sm:text-base">
-              <PlayCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" /> Watch Video
-            </button> */}
-          </div>
-        </div>
+<section className="max-w-7xl mx-auto px-6 py-24 grid lg:grid-cols-2 gap-16 items-center bg-white">
+  
+  {/* LEFT CONTENT */}
+  <div>
+    <span className="text-sm font-semibold tracking-widest text-emerald-700 uppercase">
+      About Us
+    </span>
 
-        <div className="relative">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl sm:rounded-[2.5rem] aspect-[4/3] relative overflow-hidden flex items-center justify-center">
-             {/* Abstract circle decoration */}
-            <div className="absolute w-[80%] h-[80%] border border-white/10 rounded-full animate-pulse"></div>
-            <img
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=transparent"
-              alt="Hero Illustration"
-              className="w-2/3 z-10"
-            />
-            {/* Rating Badge */}
-            <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-xl flex items-center gap-3 sm:gap-4">
-              <div className="bg-yellow-100 p-1.5 sm:p-2 rounded-lg"><Star className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-500 fill-current" /></div>
-              <div>
-                <p className="text-lg sm:text-xl font-bold leading-none text-slate-900">4.9/5</p>
-                <p className="text-xs text-slate-400 font-medium">Trusted by students worldwide</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <h1 className="mt-6 text-xl sm:text-5xl lg:text-4xl font-bold text-slate-900 leading-tight">
+      50 Years of Guiding Students<br />
+      Toward Global Education Excellence
+    </h1>
+
+    <p className="mt-6 text-lg text-slate-600 max-w-xl leading-relaxed">
+      For over five decades, we have helped students and families navigate
+      international education with clarity, integrity, and confidence.
+      Our guidance is built on experience — not trends.
+    </p>
+
+    {/* STATS */}
+    <div className="mt-10 grid grid-cols-3 gap-8 max-w-xl">
+      <div>
+        <p className="text-3xl font-bold text-slate-900">50+</p>
+        <p className="text-sm text-slate-500 mt-1">Years of Experience</p>
+      </div>
+      <div>
+        <p className="text-3xl font-bold text-slate-900">100,000+</p>
+        <p className="text-sm text-slate-500 mt-1">Students Guided</p>
+      </div>
+      <div>
+        <p className="text-3xl font-bold text-slate-900">20+</p>
+        <p className="text-sm text-slate-500 mt-1">Study Destinations</p>
+      </div>
+    </div>
+
+    {/* CTA */}
+    <div className="mt-12">
+      <button
+        className="px-8 py-4 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold transition-colors"
+      >
+        Learn About Our Legacy
+      </button>
+    </div>
+  </div>
+
+  {/* RIGHT IMAGE */}
+  <div className="relative">
+    <div className="rounded-3xl overflow-hidden border border-slate-200 bg-slate-50">
+      <img
+        src="/student-with-lightbulb-digital-art-style-education-day.jpg
+"
+        alt="Students guided toward global education"
+        className="w-full h-full object-cover"
+      />
+    </div>
+
+    {/* Rating Badge */}
+    <div className="absolute -bottom-6 left-6 bg-white border border-slate-200 rounded-2xl px-5 py-4 shadow-sm">
+      <p className="text-lg font-bold text-slate-900 leading-none">4.9 / 5</p>
+      <p className="text-xs text-slate-500 mt-1">
+        Rated by global students & families
+      </p>
+    </div>
+  </div>
+</section>
+
+
 
       {/* Stats Bar */}
       <section className="max-w-7xl mx-auto px-6 py-12 border-y border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -190,70 +249,109 @@ export default function AboutPage() {
       </section>
 
       {/* Timeline Section */}
-      <section className="max-w-7xl mx-auto px-6 py-24 bg-white rounded-3xl mx-6 mb-24">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-slate-900 mb-4">Our Journey</h2>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-            A decade of innovation, growth, and student success.
-          </p>
-        </div>
+    <section className="max-w-7xl mx-auto px-6 py-28 bg-slate-50 rounded-3xl mx-6 mb-24 border border-slate-200">
+      
+      {/* Header */}
+      <div className="max-w-3xl mb-20">
+        <span className="text-sm font-semibold tracking-wider text-emerald-700 uppercase">
+          Our Legacy
+        </span>
+        <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mt-4 mb-6 leading-tight">
+          50 Years of Guiding Students Toward Global Education
+        </h2>
+        <p className="text-lg text-slate-600 leading-relaxed">
+          For over five decades, we have helped students navigate international
+          education with integrity, expertise, and long-term success.
+        </p>
+      </div>
 
-        <div className="relative">
-          {/* Timeline Line */}
-          <div className="absolute left-4 sm:left-6 lg:left-1/2 transform lg:-translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-green-400 to-green-500 hidden lg:block"></div>
+      {/* Timeline */}
+      <div className="relative">
+        {/* Vertical Line */}
+        <div className="absolute left-3 top-0 bottom-0 w-px bg-slate-300"></div>
 
-          <div className="space-y-8 sm:space-y-12">
-            {timeline.map((item, index) => (
-              <div key={index} className={`flex items-start gap-4 sm:gap-6 lg:gap-8 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
-                <div className="flex-shrink-0 lg:flex-1">
-                  <div className={`bg-white p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-lg border border-slate-100 ${index % 2 === 1 ? 'lg:text-right' : ''}`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                      <div className="bg-green-100 text-green-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-bold text-xs sm:text-sm">
-                        {item.year}
-                      </div>
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center">
-                        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                      </div>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-                    <p className="text-slate-500 text-sm sm:text-base">{item.description}</p>
-                  </div>
-                </div>
-                <div className="hidden lg:block w-4 h-4 bg-green-500 rounded-full border-4 border-white shadow-lg"></div>
-                <div className="flex-1 hidden lg:block"></div>
+        <div className="space-y-14">
+          {legacyTimeline.map((item, index) => (
+            <div key={index} className="relative pl-12">
+              
+              {/* Dot */}
+              <div className="absolute left-0 top-2 w-6 h-6 rounded-full bg-white border-2 border-emerald-700 flex items-center justify-center">
+                <div className="w-2 h-2 bg-emerald-700 rounded-full"></div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Our Values Section */}
-      <section className="max-w-7xl mx-auto px-6 py-24">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6">
-            Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-600">Values</span>
-          </h2>
-          <p className="text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
-            The principles that guide everything we do and shape the future of education.
-          </p>
-        </div>
+              <div className="bg-white border border-slate-200 rounded-2xl p-8">
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-sm font-semibold text-emerald-700">
+                    {item.year}
+                  </span>
+                  <Calendar className="w-4 h-4 text-slate-400" />
+                </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {values.map((value, index) => (
-            <div key={index} className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-start gap-6">
-                <div className="bg-green-100 p-3 rounded-xl text-green-600">
-                  {value.icon}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">{value.title}</h3>
-                  <p className="text-slate-500 leading-relaxed">{value.description}</p>
-                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">
+                  {item.title}
+                </h3>
+
+                <p className="text-slate-600 leading-relaxed">
+                  {item.description}
+                </p>
               </div>
             </div>
           ))}
         </div>
-      </section>
+      </div>
+    </section>
+
+
+
+      {/* Our Values Section */}
+    <section className="max-w-7xl mx-auto px-6 py-28 bg-white">
+  {/* Header */}
+<div className="max-w-3xl mx-auto mb-20 text-center">
+  <span className="text-sm font-semibold tracking-wider text-emerald-700 uppercase">
+    Our Values
+  </span>
+
+  <h2 className="text-4xl md:text-5xl font-bold text-emerald-700 mt-4 mb-6 leading-tight">
+    Principles Shaped by 50 Years of Educational Guidance
+  </h2>
+
+  <p className="text-lg text-slate-600 leading-relaxed">
+    Over five decades, our values have been refined through experience,
+    responsibility, and a deep understanding of student aspirations.
+    These principles guide every decision we make.
+  </p>
+</div>
+
+
+  {/* Values Grid */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+    {values.map((value, index) => (
+      <div
+        key={index}
+        className="border border-slate-200 rounded-2xl p-10 hover:border-slate-300 transition-colors duration-300"
+      >
+        <div className="flex items-start gap-6">
+          <div className="flex-shrink-0 w-12 h-12 rounded-full border border-emerald-700 flex items-center justify-center text-emerald-700 font-semibold">
+            {index + 1}
+          </div>
+
+          <div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-4">
+              {value.title}
+            </h3>
+            <p className="text-slate-600 leading-relaxed mb-4">
+              {value.description}
+            </p>
+            <p className="text-slate-500 text-sm leading-relaxed">
+              {value.subtext}
+            </p>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
+
 
       {/* Meet Our Experts */}
       {/* <section className="max-w-7xl mx-auto px-6 py-24">
