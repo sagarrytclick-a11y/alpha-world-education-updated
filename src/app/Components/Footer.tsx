@@ -150,16 +150,25 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 sm:pt-12 lg:pt-16 border-t border-slate-700/50">
           <div className="flex flex-col gap-8 sm:gap-12 mb-6 sm:mb-8">
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:text-center">
               <p className="text-gray-300 text-xs sm:text-sm mb-2 font-medium">© {SITE_IDENTITY.business.established} {SITE_IDENTITY.name}. All rights reserved.</p>
               <p className="text-gray-400 text-xs">{SITE_IDENTITY.tagline}</p>
             </div>
+<div className="mt-8 text-center max-w-4xl mx-auto">
+  <p className="text-gray-400 text-xs leading-relaxed">
+    Disclaimer: Alpha World Education provides guidance and counseling services
+    based on experience and available information. We do not guarantee admission,
+    visa approval, or outcomes, as final decisions are made by respective
+    institutions and authorities.
+  </p>
+</div>
 
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8 text-xs sm:text-sm">
-              <Link href="#" className="text-gray-400 hover:text-green-400 hover:scale-105 transition-all duration-200">Privacy Policy</Link>
-              <Link href="#" className="text-gray-400 hover:text-green-400 hover:scale-105 transition-all duration-200">Terms of Service</Link>
+              <Link href="/privacy" className="text-gray-400 hover:text-green-400 hover:scale-105 transition-all duration-200">Privacy Policy</Link>
+              <Link href="/term" className="text-gray-400 hover:text-green-400 hover:scale-105 transition-all duration-200">Terms of Service</Link>
               <Link href="#" className="text-gray-400 hover:text-green-400 hover:scale-105 transition-all duration-200">Cookie Policy</Link>
-              <Link href="#" className="text-gray-400 hover:text-green-400 hover:scale-105 transition-all duration-200">Contact Us</Link>
+              <Link href="/contact" className="text-gray-400 hover:text-green-400 hover:scale-105 transition-all duration-200">Contact Us</Link>
+            
             </div>
 
             {/* Social Proof */}
