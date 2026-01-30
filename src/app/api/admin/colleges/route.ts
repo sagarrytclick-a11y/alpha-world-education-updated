@@ -40,34 +40,14 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🚀 [API] POST /api/admin/colleges - Request received');
-    
-    console.log('🔗 [API] Connecting to database...');
     await connectDB();
-    console.log('✅ [API] Database connected successfully');
-    
-    console.log('📥 [API] Parsing request body...');
-    const body = await request.json();
-    console.log('📦 [API] Request body:', body);
-    
-    const { 
-      name, 
-      slug, 
-      country_ref, 
-      exams, 
-      fees, 
-      duration, 
-      establishment_year,
-      ranking,
-      banner_url, 
-      about_content, 
-      is_active 
-    } = body;
 
-    console.log('🔍 [API] Extracted fields:', {
+    const body = await request.json();
+
+    const {
       name,
       slug,
-      country_ref,
+      country_ref, 
       exams,
       fees,
       duration,
@@ -75,69 +55,72 @@ export async function POST(request: NextRequest) {
       ranking,
       banner_url,
       about_content,
-      is_active
-    });
+      is_active,
 
-    // Validation using utility
-    console.log('✅ [API] Starting validation...');
-    validateRequiredFields(body, ['name', 'slug', 'country_ref', 'fees', 'duration', 'about_content']);
-    console.log('✅ [API] Validation passed');
+    
+      overview,
+      key_highlights,
+      why_choose_us,
+      fees_structure,
+      campus_highlights,
+    } = body;
 
-    // Find country by slug to get ObjectId
-    console.log('🔍 [API] Finding country with slug:', country_ref);
+    // ✅ Required validation
+    validateRequiredFields(
+      { name, slug, country_ref },
+      ["name", "slug", "country_ref"]
+    );
+
+    // 🌍 Find country ObjectId
     const country = await Country.findOne({ slug: country_ref });
     if (!country) {
-      console.log('❌ [API] Country not found with slug:', country_ref);
-      
-      // Get available countries for helpful error message
-      const availableCountries = await Country.find({}).select('slug name flag');
-      const countryList = availableCountries.map(c => `- ${c.slug} (${c.flag} ${c.name})`).join('\n');
-      
-      throw new ValidationError(
-        "Country not found",
-        {
-          invalidCountry: country_ref,
-          availableCountries: availableCountries,
-          message: `Country with slug '${country_ref}' not found. Available countries:\n${countryList}`
-        }
-      );
+      throw new ValidationError("Country not found", { country_ref });
     }
-    console.log('✅ [API] Country found:', country.name);
 
-    // Check if college with same slug already exists
-    console.log('🔍 [API] Checking for existing college with slug:', slug);
+    // 🔒 Unique slug check
     const existingCollege = await College.findOne({ slug });
     if (existingCollege) {
-      console.log('❌ [API] College with slug already exists:', existingCollege.name);
-      throw new ValidationError(
-        "College with this slug already exists",
-        { existingSlug: slug, existingCollege: existingCollege.name }
-      );
+      throw new ValidationError("College with this slug already exists", {
+        slug,
+      });
     }
-    console.log('✅ [API] No existing college found with slug');
 
-    console.log('🏗️ [API] Creating new college document...');
+    // 🏗️ Create college (ALIGNED WITH MODEL)
     const college = new College({
       name,
       slug,
-      country_ref: country._id, // Use the ObjectId from the found country
+      country_ref: country._id,
+
       exams: exams || [],
-      fees: Number(fees),
+      fees,
       duration,
       establishment_year,
       ranking,
-      banner_url: banner_url || "",
+      banner_url,
       about_content,
-      is_active: is_active !== undefined ? is_active : true,
+
+      // CMS
+      overview: overview || {
+        title: name,
+        content: about_content || "",
+        university_details: country.name,
+      },
+      key_highlights,
+      why_choose_us,
+      fees_structure,
+      campus_highlights,
+
+      is_active: is_active ?? true,
     });
 
-    console.log('💾 [API] Saving college to database...');
     const savedCollege = await college.save();
-    console.log('✅ [API] College saved successfully:', savedCollege);
 
-    return createSuccessResponse(savedCollege, "College created successfully");
-    
+    return createSuccessResponse(
+      savedCollege,
+      "College created successfully"
+    );
   } catch (error) {
     return handleApiError(error);
   }
 }
+

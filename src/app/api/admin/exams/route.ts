@@ -25,47 +25,14 @@ export async function GET() {
   }
 }
 
+
+
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
     const body = await request.json();
 
-    const { 
-      name, 
-      slug, 
-      short_name, 
-      exam_type, 
-      conducting_body, 
-      exam_mode, 
-      frequency, 
-      description, 
-      applicable_countries, 
-      is_active, 
-      display_order 
-    } = body;
-
-    if (!name || !slug || !short_name || !exam_type || !conducting_body || !exam_mode || !frequency || !description) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Missing required fields: name, slug, short_name, exam_type, conducting_body, exam_mode, frequency, description",
-        },
-        { status: 400 }
-      );
-    }
-
-    const existingExam = await Exam.findOne({ slug });
-    if (existingExam) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Exam with this slug already exists",
-        },
-        { status: 409 }
-      );
-    }
-
-    const exam = new Exam({
+    const {
       name,
       slug,
       short_name,
@@ -74,12 +41,59 @@ export async function POST(request: NextRequest) {
       exam_mode,
       frequency,
       description,
+
+      overview,
+      highlights,
+      eligibility,
+      exam_pattern,
+      result_stats,
+      exam_dates,
+
+      content, 
+
+      applicable_countries,
+      is_active,
+      display_order,
+    } = body;
+
+    if (!name || !slug || !short_name || !description) {
+      return NextResponse.json(
+        { success: false, message: "Required fields missing" },
+        { status: 400 }
+      );
+    }
+
+    const existingExam = await Exam.findOne({ slug });
+    if (existingExam) {
+      return NextResponse.json(
+        { success: false, message: "Slug already exists" },
+        { status: 409 }
+      );
+    }
+
+    const exam = await Exam.create({
+      name,
+      slug,
+      short_name,
+      exam_type,
+      conducting_body,
+      exam_mode,
+      frequency,
+      description,
+
+      overview,
+      highlights,
+      eligibility,
+      exam_pattern,
+      result_stats,
+      exam_dates,
+
+      content, 
+
       applicable_countries: applicable_countries || [],
-      is_active: is_active !== undefined ? is_active : true,
+      is_active: is_active ?? true,
       display_order: display_order || 0,
     });
-
-    await exam.save();
 
     return NextResponse.json({
       success: true,
@@ -87,13 +101,9 @@ export async function POST(request: NextRequest) {
       data: exam,
     });
   } catch (error) {
-    console.error("Error creating exam:", error);
+    console.error("Create exam error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to create exam",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { success: false, message: "Failed to create exam" },
       { status: 500 }
     );
   }

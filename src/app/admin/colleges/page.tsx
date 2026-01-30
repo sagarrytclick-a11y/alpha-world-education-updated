@@ -30,6 +30,7 @@ export interface College {
   name: string
   slug: string
   country_ref: AdminCountry | string
+
   exams: string[]
   fees: number
   duration: string
@@ -38,9 +39,97 @@ export interface College {
   banner_url: string
   about_content: string
   is_active: boolean
+
+  // 🔽 CMS / NESTED FIELDS (ADD THESE)
+  overview?: {
+    title: string
+    content: string
+    university_details: string
+  }
+
+  key_highlights?: {
+    title: string
+    items: {
+      label: string
+      value: string
+    }[]
+  }
+
+  why_choose_us?: {
+    title: string
+    description: string
+    features: {
+      title: string
+      description: string
+    }[]
+  }
+
+  fees_structure?: {
+    title: string
+    university_fees: {
+      course: string
+      duration: string
+      annual_fees_in_inr: string
+    }[]
+  }
+
+  campus_highlights?: {
+    title: string
+    facilities: string[]
+    student_life: string
+  }
+
   createdAt: string
   updatedAt: string
 }
+
+
+interface CollegeFormData {
+  name: string
+  slug: string
+  country: string
+  exams: string[]
+  fees: string
+  duration: string
+  establishment_year: string
+  ranking: string
+  banner_url: string
+  about: string
+  is_active: boolean
+
+  overview: {
+    title: string
+    content: string
+    university_details: string
+  }
+
+  key_highlights: {
+    title: string
+    items: { label: string; value: string }[]
+  }
+
+  why_choose_us: {
+    title: string
+    description: string
+    features: { title: string; description: string }[]
+  }
+
+  fees_structure: {
+    title: string
+    university_fees: {
+      course: string
+      duration: string
+      annual_fees_in_inr: string
+    }[]
+  }
+
+  campus_highlights: {
+    title: string
+    facilities: string[]
+    student_life: string
+  }
+}
+
 
 export default function CollegesPage() {
   const [colleges, setColleges] = useState<College[]>([])
@@ -53,20 +142,70 @@ export default function CollegesPage() {
   const [dataLoading, setDataLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCountry, setSelectedCountry] = useState<string>('all')
+function setNestedValue<T extends Record<string, any>>(
+  obj: T,
+  path: string,
+  value: unknown
+): T {
+  const keys = path.split('.')
+  const lastKey = keys.pop()!
+
+  const result = { ...obj }
+  let current: any = result
+
+  for (const key of keys) {
+    if (!current[key]) current[key] = {}
+    current = current[key]
+  }
+
+  current[lastKey] = value
+  return result
+}
+
+
   
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    country: '',
-    exams: [] as string[],
-    fees: '',
-    duration: '',
-    establishment_year: '',
-    ranking: '',
-    banner_url: '',
-    about: '',
-    is_active: true
-  })
+const [formData, setFormData] = useState<CollegeFormData>({
+  name: '',
+  slug: '',
+  country: '',
+  exams: [],
+  fees: '',
+  duration: '',
+  establishment_year: '',
+  ranking: '',
+  banner_url: '',
+  about: '',
+  is_active: true,
+
+  overview: {
+    title: '',
+    content: '',
+    university_details: '',
+  },
+
+  key_highlights: {
+    title: '',
+    items: [],
+  },
+
+  why_choose_us: {
+    title: '',
+    description: '',
+    features: [],
+  },
+
+  fees_structure: {
+    title: '',
+    university_fees: [],
+  },
+
+  campus_highlights: {
+    title: '',
+    facilities: [],
+    student_life: '',
+  },
+})
+
   const [countries, setCountries] = useState(dummyCountries)
 
   // Fetch colleges and countries from API
@@ -123,11 +262,14 @@ export default function CollegesPage() {
       })
     }
 
-    if (searchTerm) {
-      filtered = filtered.filter(college => 
-        college.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
+ if (searchTerm) {
+  const term = searchTerm.toLowerCase()
+
+  filtered = filtered.filter(college =>
+    college.name?.toLowerCase().includes(term)
+  )
+}
+
 
     setFilteredColleges(filtered)
   }, [colleges, searchTerm, selectedCountry])
@@ -172,11 +314,14 @@ export default function CollegesPage() {
     {
       key: 'fees' as keyof College,
       title: 'Fees',
-      render: (value: number) => (
-        <div className="font-medium">
-          ${value.toLocaleString()}/year
-        </div>
-      )
+    render: (value?: number) => (
+  <div className="font-medium">
+    {typeof value === "number"
+      ? `₹${value.toLocaleString()}/year`
+      : "—"}
+  </div>
+)
+
     },
     {
       key: 'duration' as keyof College,
@@ -214,23 +359,34 @@ export default function CollegesPage() {
   const actions = [
     createEditAction((college: College) => {
       setEditingCollege(college)
-      setFormData({
-        name: college.name,
-        slug: college.slug,
-        country: !college.country_ref 
-          ? ''
-          : typeof college.country_ref === 'string' 
-            ? college.country_ref 
-            : college.country_ref.slug || '',
-        exams: college.exams,
-        fees: college.fees.toString(),
-        duration: college.duration,
-        establishment_year: college.establishment_year || '',
-        ranking: college.ranking || '',
-        banner_url: college.banner_url || '',
-        about: college.about_content,
-        is_active: college.is_active
-      })
+   setFormData(prev => ({
+  ...prev,
+
+  name: college.name,
+  slug: college.slug,
+  country: !college.country_ref
+    ? ''
+    : typeof college.country_ref === 'string'
+      ? college.country_ref
+      : college.country_ref.slug || '',
+
+  exams: college.exams ?? [],
+  fees: college.fees != null ? String(college.fees) : '',
+  duration: college.duration ?? '',
+  establishment_year: college.establishment_year ?? '',
+  ranking: college.ranking ?? '',
+  banner_url: college.banner_url ?? '',
+  about: college.about_content ?? '',
+  is_active: college.is_active ?? true,
+
+  // 🔽 ALSO PREFILL CMS DATA IF EXISTS
+  overview: college.overview ?? prev.overview,
+  key_highlights: college.key_highlights ?? prev.key_highlights,
+  why_choose_us: college.why_choose_us ?? prev.why_choose_us,
+  fees_structure: college.fees_structure ?? prev.fees_structure,
+  campus_highlights: college.campus_highlights ?? prev.campus_highlights,
+}))
+
       setIsModalOpen(true)
     }),
     createDeleteAction((college: College) => {
@@ -314,25 +470,75 @@ export default function CollegesPage() {
       placeholder: 'Enter college description',
       required: true
     },
+    { name: 'overview.title', label: 'Overview Title', type: 'text' },
+  { name: 'overview.content', label: 'Overview Content', type: 'textarea' },
+  {
+    name: 'overview.university_details',
+    label: 'University Details',
+    type: 'text',
+  },
+
+  // ===== CAMPUS =====
+  { name: 'campus_highlights.title', label: 'Campus Title', type: 'text' },
+  {
+    name: 'campus_highlights.facilities',
+    label: 'Facilities',
+    type: 'tags',
+  },
+  {
+    name: 'campus_highlights.student_life',
+    label: 'Student Life',
+    type: 'textarea',
+  },
   ]
 
-  const handleAddCollege = () => {
-    setEditingCollege(null)
-    setFormData({
-      name: '',
-      slug: '',
-      country: '',
-      exams: [],
-      fees: '',
-      duration: '',
-      establishment_year: '',
-      ranking: '',
-      banner_url: '',
-      about: '',
-      is_active: true
-    })
-    setIsModalOpen(true)
-  }
+const handleAddCollege = () => {
+  setEditingCollege(null)
+  setFormData(prev => ({
+    ...prev,
+
+    name: '',
+    slug: '',
+    country: '',
+    exams: [],
+    fees: '',
+    duration: '',
+    establishment_year: '',
+    ranking: '',
+    banner_url: '',
+    about: '',
+    is_active: true,
+
+    overview: {
+      title: '',
+      content: '',
+      university_details: '',
+    },
+
+    key_highlights: {
+      title: '',
+      items: [],
+    },
+
+    why_choose_us: {
+      title: '',
+      description: '',
+      features: [],
+    },
+
+    fees_structure: {
+      title: '',
+      university_fees: [],
+    },
+
+    campus_highlights: {
+      title: '',
+      facilities: [],
+      student_life: '',
+    },
+  }))
+  setIsModalOpen(true)
+}
 
   const handleSaveCollege = async () => {
     setLoading(true)
@@ -515,21 +721,27 @@ export default function CollegesPage() {
           loading={loading}
           size="xl"
         >
-          <AdminForm
-            fields={formFields}
-            data={formData}
-            onChange={(field, value) => {
-              setFormData(prev => ({ 
-                ...prev, 
-                [field]: value,
-                // Auto-generate slug when name changes and slug is empty or being edited for the first time
-                ...(field === 'name' && (!prev.slug || prev.slug === generateSlug(prev.name)) ? {
-                  slug: generateSlug(value as string)
-                } : {})
-              }))
-            }}
-            loading={loading}
-          />
+         <AdminForm
+  fields={formFields}
+  data={formData}
+  onChange={(field, value) => {
+    setFormData((prev: CollegeFormData) =>
+      setNestedValue(
+        {
+          ...prev,
+          ...(field === 'name' &&
+          (!prev.slug || prev.slug === generateSlug(prev.name))
+            ? { slug: generateSlug(value as string) }
+            : {}),
+        },
+        field,
+        value
+      )
+    )
+  }}
+  loading={loading}
+/>
+
         </AdminModal>
 
         {/* Delete Confirmation Modal */}
