@@ -22,8 +22,13 @@ import {
   Target,
   CheckCircle,
   MapPin,
-  ArrowRight
+  ArrowRight,
+  Timer,
+  TrendingUp,
+  CalendarDays,
+  GraduationCap
 } from 'lucide-react'
+import './styles.css'
 
 interface Country {
   _id: string
@@ -42,6 +47,47 @@ interface Exam {
   exam_mode: string
   frequency: string
   description: string
+  hero_section: {
+    title: string
+    subtitle?: string
+    image?: string
+  }
+  overview: {
+    title: string
+    content: string
+    key_highlights: string[]
+  }
+  registration: {
+    title: string
+    description: string
+    image?: string
+    bullet_points: string[]
+  }
+  exam_pattern: {
+    title: string
+    description: string
+    total_duration_mins: number
+    score_range: string
+    table_data: {
+      section: string
+      questions: number
+      duration_mins: number
+    }[]
+  }
+  exam_dates: {
+    title: string
+    important_dates: {
+      event: string
+      date: Date
+    }[]
+  }
+  result_statistics: {
+    title: string
+    description: string
+    passing_criteria: string
+    total_marks: number
+    passing_marks: number
+  }
   applicable_countries: Country[]
   is_active: boolean
   display_order: number
@@ -54,6 +100,7 @@ const ExamPage = () => {
   const slug = params.slug as string
   const [exam, setExam] = useState<Exam | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState('overview')
   const { openModal } = useFormModal()
 
   useEffect(() => {
@@ -79,6 +126,30 @@ const ExamPage = () => {
       fetchExam()
     }
   }, [slug])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['overview', 'registration', 'pattern', 'dates', 'results', 'faq']
+      
+      for (const section of sections) {
+        const element = document.getElementById(section)
+        if (element) {
+          const rect = element.getBoundingClientRect()
+          const isVisible = rect.top <= 100 && rect.bottom >= 100
+          
+          if (isVisible) {
+            setActiveTab(section)
+            break
+          }
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // Check initial position
+    
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   if (loading) {
     return (
@@ -110,191 +181,401 @@ const ExamPage = () => {
     )
   }
 
-  const examInfo = [
-    {
-      icon: Building,
-      label: 'Conducting Body',
-      value: exam.conducting_body,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50'
-    },
-    {
-      icon: Monitor,
-      label: 'Exam Mode',
-      value: exam.exam_mode,
-      color: 'text-green-600',
-      bg: 'bg-green-50'
-    },
-    {
-      icon: Calendar,
-      label: 'Frequency',
-      value: exam.frequency,
-      color: 'text-purple-600',
-      bg: 'bg-purple-50'
-    },
-    {
-      icon: Globe,
-      label: 'Exam Type',
-      value: exam.exam_type,
-      color: 'text-orange-600',
-      bg: 'bg-orange-50'
+  
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setActiveTab(sectionId)
     }
+  }
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: BookOpen },
+    { id: 'registration', label: 'Registration', icon: Users },
+    { id: 'pattern', label: 'Exam Pattern', icon: Timer },
+    { id: 'dates', label: 'Exam Date', icon: CalendarDays },
+    { id: 'results', label: 'Result statistics', icon: Award },
+    { id: 'faq', label: 'FAQs', icon: CheckCircle }
   ]
 
-  const benefits = [
-    'Global Recognition',
-    'University Admissions',
-    'Scholarship Opportunities',
-    'Career Advancement',
-    'Skill Assessment',
-    'International Opportunities'
-  ]
+  const getAvailableTabs = () => {
+    return tabs.filter((tab: any) => {
+      switch(tab.id) {
+        case 'overview': return exam?.overview
+        case 'registration': return exam?.registration
+        case 'pattern': return exam?.exam_pattern
+        case 'dates': return exam?.exam_dates
+        case 'results': return exam?.result_statistics
+        case 'faq': return true // FAQ is always available
+        default: return true
+      }
+    })
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
-      {/* Header */}
-      <div className="bg-white border-b border-slate-100 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/exams">
-            <Button variant="ghost" className="mb-4 text-slate-500 hover:text-green-600 font-bold flex gap-2">
-              <ArrowLeft size={16} />
-              Back to Exams
-            </Button>
-          </Link>
-          
-          <div className="flex flex-wrap gap-3 mb-4">
-            <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
+      {/* Hero Section - Image Only */}
+      {exam.hero_section && (
+        <div className="relative bg-gradient-to-br from-green-600 to-emerald-700 text-white overflow-hidden h-96">
+          <div className="absolute inset-0 bg-black/20" />
+          {exam.hero_section.image && (
+            <div className="absolute inset-0">
+              <img 
+                src={exam.hero_section.image} 
+                alt={exam.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Navigation Breadcrumb */}
+      <div className="bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Link href="/exams" className="hover:text-green-600 font-medium">Exams</Link>
+            <ArrowRight className="w-4 h-4" />
+            <span className="text-slate-900 font-medium">{exam.short_name}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Navigation - Enhanced Sticky */}
+      <div className="sticky-tabs">
+        <div className="sticky-tabs-container">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+            {getAvailableTabs().map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => scrollToSection(tab.id)}
+                  className={`tab-button ${
+                    activeTab === tab.id
+                      ? 'tab-button-active'
+                      : 'tab-button-inactive'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Hero Content - Moved Below Tabs */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-3 mb-6">
+            <Badge className="bg-green-100 text-green-800 border-green-200 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
               {exam.exam_type}
             </Badge>
-            <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
+            <Badge className="bg-blue-100 text-blue-800 border-blue-200 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
               {exam.exam_mode}
             </Badge>
-            <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-100 border-none px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
+            <Badge className="bg-purple-100 text-purple-800 border-purple-200 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
               {exam.frequency}
             </Badge>
           </div>
           
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter mb-6 leading-tight">
-            {exam.name}
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight text-slate-900">
+            {exam.hero_section?.title || exam.name}
           </h1>
           
-          <p className="text-xl text-slate-600 max-w-3xl leading-relaxed font-medium">
-            {exam.description}
-          </p>
-        </div>
-      </div>
-
-      {/* Exam Information */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {examInfo.map((info, index) => (
-            <Card key={index} className="border-none shadow-lg rounded-2xl">
-              <CardContent className="p-6 text-center">
-                <div className={`${info.bg} w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                  <info.icon className={`w-8 h-8 ${info.color}`} />
-                </div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{info.label}</p>
-                <p className="text-lg font-bold text-slate-900">{info.value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Description Section */}
-        <Card className="border-none shadow-lg rounded-2xl mb-12">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
-                <FileText className="w-6 h-6 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-black text-slate-900">About {exam.short_name}</h2>
-            </div>
-            <div className="prose prose-lg max-w-none">
-              <p className="text-slate-700 leading-relaxed font-medium">
-                {exam.description}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Benefits Section */}
-        <Card className="border-none shadow-lg rounded-2xl mb-12">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center">
-                <Award className="w-6 h-6 text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-black text-slate-900">Key Benefits</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  <span className="font-semibold text-slate-700">{benefit}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Applicable Countries */}
-        {exam.applicable_countries.length > 0 && (
-          <Card className="border-none shadow-lg rounded-2xl mb-12">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center">
-                  <Globe className="w-6 h-6 text-purple-600" />
-                </div>
-                <h2 className="text-2xl font-black text-slate-900">Applicable Countries</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {exam.applicable_countries.map((country) => (
-                  <Link
-                    key={country._id}
-                    href={`/countries/${country.slug}`}
-                    className="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition-all duration-200"
-                  >
-                    <span className="text-2xl">{country.flag}</span>
-                    <div>
-                      <p className="font-semibold text-slate-900">{country.name}</p>
-                      <p className="text-sm text-slate-500">View study options</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* CTA Section */}
-        <Card className="border-none bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl overflow-hidden text-white">
-          <CardContent className="p-10 text-center">
-            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6">
-              <Target className="w-10 h-10 text-white" />
-            </div>
-            <h2 className="text-3xl font-black mb-4">Ready to Ace {exam.short_name}?</h2>
-            <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
-              Get expert guidance and comprehensive preparation to excel in your {exam.name} and achieve your study abroad dreams.
+          {exam.hero_section?.subtitle && (
+            <p className="text-xl text-slate-600 mb-8 max-w-3xl leading-relaxed font-medium">
+              {exam.hero_section.subtitle}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          )}
+          
+          <div className="flex flex-wrap gap-4">
+            <Button 
+              onClick={openModal}
+              className="bg-green-600 text-white hover:bg-green-700 font-black rounded-2xl h-14 px-8 text-lg"
+            >
+              Get Expert Guidance
+            </Button>
+            <Link href="/exams">
               <Button 
-                onClick={openModal}
-                className="bg-white text-green-600 hover:bg-green-50 font-black rounded-2xl h-14 px-8 text-lg"
+                variant="outline"
+                className="border-slate-300 text-slate-700 hover:bg-slate-50 font-black rounded-2xl h-14 px-8 text-lg"
               >
-                Get Expert Guidance
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Exams
               </Button>
-              <Link 
-               href={'/blogs'}
-                className="border-white/20 flex items-center gap-2 justify-center bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl h-14 px-8 text-lg"
-              >
-                Explore Latest Blogs
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
+            </Link>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-8">
+          {/* Main Content */}
+          <div className="col-span-1 space-y-8">
+            
+            {/* Overview Section */}
+            {exam.overview && (
+              <div id="overview" className="scroll-mt-24">
+                <Card className="border-none shadow-lg rounded-2xl overflow-hidden mb-8">
+                  <CardContent className="p-0">
+                    <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-8 rounded-t-2xl">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                          <BookOpen className="w-6 h-6 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-black">{exam.overview.title}</h2>
+                      </div>
+                    </div>
+                    <div className="p-8">
+                      <div className="prose prose-lg max-w-none mb-8">
+                        <p className="text-slate-700 leading-relaxed font-medium">
+                          {exam.overview.content}
+                        </p>
+                      </div>
+                      
+                      {exam.overview.key_highlights.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900 mb-4">Key Highlights</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {exam.overview.key_highlights.map((highlight, index) => (
+                              <div key={index} className="flex items-center gap-3 p-4 bg-green-50 rounded-xl">
+                                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                <span className="font-semibold text-slate-700">{highlight}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Registration Section */}
+            {exam.registration && (
+              <div id="registration" className="scroll-mt-24">
+                <Card className="border-none shadow-lg rounded-2xl mb-8">
+                  <CardContent className="p-0">
+                    {/* Registration Header with Image */}
+                    <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white overflow-hidden rounded-t-2xl">
+                      {exam.registration.image && (
+                        <div className="absolute inset-0">
+                          <img 
+                            src={exam.registration.image} 
+                            alt={exam.registration.title}
+                            className="w-full h-full object-cover opacity-20"
+                          />
+                        </div>
+                      )}
+                      <div className="relative p-8">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                            <Users className="w-6 h-6 text-white" />
+                          </div>
+                          <h2 className="text-2xl font-black">{exam.registration.title}</h2>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-8">
+                      <p className="text-slate-700 leading-relaxed font-medium mb-6">
+                        {exam.registration.description}
+                      </p>
+                      
+                      {exam.registration.bullet_points && exam.registration.bullet_points.length > 0 && (
+                        <div className="space-y-3">
+                          <h3 className="text-lg font-bold text-slate-900 mb-4">Registration Steps</h3>
+                          {exam.registration.bullet_points.map((point, index) => (
+                            <div key={index} className="flex items-start gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span className="text-sm font-bold">{index + 1}</span>
+                              </div>
+                              <div className="flex-1">
+                                <span className="font-medium text-slate-700">{point}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Exam Pattern Section */}
+            {exam.exam_pattern && (
+              <div id="pattern" className="scroll-mt-24">
+                <Card className="border-none shadow-lg rounded-2xl mb-8">
+                  <CardContent className="p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center">
+                        <Timer className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <h2 className="text-2xl font-black text-slate-900">{exam.exam_pattern.title}</h2>
+                    </div>
+                    
+                    <p className="text-slate-700 leading-relaxed font-medium mb-6">
+                      {exam.exam_pattern.description}
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                      <div className="text-center p-6 bg-purple-50 rounded-xl">
+                        <Timer className="w-8 h-8 text-purple-600 mx-auto mb-3" />
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Duration</p>
+                        <p className="text-2xl font-black text-slate-900">{exam.exam_pattern.total_duration_mins} mins</p>
+                      </div>
+                      <div className="text-center p-6 bg-green-50 rounded-xl">
+                        <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-3" />
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Score Range</p>
+                        <p className="text-2xl font-black text-slate-900">{exam.exam_pattern.score_range}</p>
+                      </div>
+                      <div className="text-center p-6 bg-blue-50 rounded-xl">
+                        <FileText className="w-8 h-8 text-blue-600 mx-auto mb-3" />
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Total Questions</p>
+                        <p className="text-2xl font-black text-slate-900">
+                          {exam.exam_pattern?.table_data?.reduce((sum, section) => sum + (Number(section.questions) || 0), 0) || 0}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {exam.exam_pattern.table_data.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-900 mb-4">Section-wise Breakdown</h3>
+                        <div className="overflow-x-auto">
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="bg-slate-50">
+                                <th className="text-left p-4 font-bold text-slate-700 border-b border-slate-200">Section</th>
+                                <th className="text-center p-4 font-bold text-slate-700 border-b border-slate-200">Questions</th>
+                                <th className="text-center p-4 font-bold text-slate-700 border-b border-slate-200">Duration</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {exam.exam_pattern.table_data.map((section, index) => (
+                                <tr key={index} className="hover:bg-slate-50 transition-colors duration-200">
+                                  <td className="p-4 font-medium text-slate-900 border-b border-slate-100">{section.section}</td>
+                                  <td className="text-center p-4 text-slate-700 border-b border-slate-100">{section.questions}</td>
+                                  <td className="text-center p-4 text-slate-700 border-b border-slate-100">{section.duration_mins} mins</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Exam Dates Section */}
+            {exam.exam_dates && (
+              <div id="dates" className="scroll-mt-24">
+                <Card className="border-none shadow-lg rounded-2xl mb-8">
+                  <CardContent className="p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center">
+                        <CalendarDays className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <h2 className="text-2xl font-black text-slate-900">{exam.exam_dates.title}</h2>
+                    </div>
+                    
+                    {exam.exam_dates.important_dates.length > 0 && (
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="bg-orange-50">
+                              <th className="text-left p-4 font-bold text-orange-700 border-b border-orange-200">Event</th>
+                              <th className="text-center p-4 font-bold text-orange-700 border-b border-orange-200">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {exam.exam_dates.important_dates.map((dateItem, index) => (
+                              <tr key={index} className="hover:bg-orange-50 transition-colors duration-200">
+                                <td className="p-4 font-medium text-slate-900 border-b border-orange-100">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-orange-600 text-white rounded-lg flex items-center justify-center">
+                                      <Calendar className="w-4 h-4" />
+                                    </div>
+                                    {dateItem.event}
+                                  </div>
+                                </td>
+                                <td className="text-center p-4 font-bold text-orange-600 border-b border-orange-100">
+                                  {formatDate(dateItem.date)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+     
+
+            {/* Result Statistics Section */}
+            {exam.result_statistics && (
+              <div id="results" className="scroll-mt-24">
+                <Card className="border-none shadow-lg rounded-2xl mb-8">
+                  <CardContent className="p-8 rounded-2xl">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center">
+                        <Award className="w-6 h-6 text-green-600" />
+                      </div>
+                      <h2 className="text-2xl font-black text-slate-900">{exam.result_statistics.title}</h2>
+                    </div>
+                    
+                    <p className="text-slate-700 leading-relaxed font-medium mb-6">
+                      {exam.result_statistics.description}
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                      <div className="text-center p-6 bg-slate-50 rounded-xl">
+                        <p className="text-3xl font-black text-slate-900 mb-2">{exam.result_statistics.total_marks}</p>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Total Marks</p>
+                      </div>
+                      <div className="text-center p-6 bg-green-50 rounded-xl">
+                        <p className="text-3xl font-black text-green-600 mb-2">{exam.result_statistics.passing_marks}</p>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Passing Marks</p>
+                      </div>
+                      <div className="text-center p-6 bg-blue-50 rounded-xl">
+                        <p className="text-3xl font-black text-blue-600 mb-2">
+                          {Math.round((exam.result_statistics.passing_marks / exam.result_statistics.total_marks) * 100)}%
+                        </p>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Pass Percentage</p>
+                      </div>
+                      <div className="text-center p-6 bg-purple-50 rounded-xl">
+                        <p className="text-lg font-black text-purple-600 mb-2">{exam.result_statistics.passing_criteria}</p>
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Criteria</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* FAQ Section */}
+            <div id="faq" className="scroll-mt-24">
+              <FAQ />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+        </div>
       </div>
-      <FAQ />
     </div>
   )
 }

@@ -9,8 +9,7 @@ export async function GET(
   try {
     await connectDB();
     const { slug } = await params;
-    const exam = await Exam.findOne({ slug, is_active: true })
-      .populate('applicable_countries', 'name slug flag');
+    const exam = await Exam.findOne({ slug, is_active: true });
     
     if (!exam) {
       return NextResponse.json(
