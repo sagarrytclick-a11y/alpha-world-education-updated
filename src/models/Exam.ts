@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { generateSlug } from "@/lib/slug";
 
 const ExamSchema = new mongoose.Schema(
   {
+    // Basic Info
     name: {
       type: String,
       required: true,
@@ -41,10 +41,61 @@ const ExamSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    applicable_countries: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Country",
-    }],
+
+    // Hero Section
+    hero_section: {
+      title: { type: String, required: true },
+      subtitle: { type: String },
+      image: { type: String }
+    },
+
+    // Overview
+    overview: {
+      title: { type: String, required: true },
+      content: { type: String, required: true },
+      key_highlights: [{ type: String }]
+    },
+
+    // Registration
+    registration: {
+      title: { type: String, required: true },
+      description: { type: String, required: true },
+      image: { type: String },
+      bullet_points: [{ type: String }]
+    },
+
+    // Exam Pattern
+    exam_pattern: {
+      title: { type: String, required: true },
+      description: { type: String, required: true },
+      total_duration_mins: { type: Number, required: true },
+      score_range: { type: String, required: true },
+      table_data: [{
+        section: { type: String, required: true },
+        questions: { type: Number, required: true },
+        duration_mins: { type: Number, required: true }
+      }]
+    },
+
+    // Exam Dates
+    exam_dates: {
+      title: { type: String, required: true },
+      important_dates: [{
+        event: { type: String, required: true },
+        date: { type: Date, required: true }
+      }]
+    },
+
+    // Result Statistics
+    result_statistics: {
+      title: { type: String, required: true },
+      description: { type: String, required: true },
+      passing_criteria: { type: String, required: true },
+      total_marks: { type: Number, required: true },
+      passing_marks: { type: Number, required: true }
+    },
+
+    // Status
     is_active: {
       type: Boolean,
       default: true,

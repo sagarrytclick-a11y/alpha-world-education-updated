@@ -20,7 +20,11 @@ interface Exam {
   exam_mode: string
   frequency: string
   description: string
-  applicable_countries: string[]
+  hero_section: {
+    title: string
+    subtitle?: string
+    image?: string
+  }
   is_active: boolean
   display_order: number
 }
@@ -167,7 +171,18 @@ export default function ExamsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredExams.map((exam) => (
                 <Card key={exam._id} className="group border border-gray-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
-                  <CardHeader className="p-8 pb-4">
+                  {/* Hero Image */}
+                  {exam.hero_section?.image && (
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={exam.hero_section.image} 
+                        alt={exam.hero_section.title || exam.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    </div>
+                  )}
+                  <CardHeader className={exam.hero_section?.image ? "p-8 pb-4" : "p-8 pb-4 pt-8"}>
                     <div className="flex justify-between items-start mb-4">
                       <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center shadow-inner">
                         <FileText size={24} />
@@ -212,22 +227,9 @@ export default function ExamsPage() {
                         >
                           Mode: {exam.exam_mode}
                         </Badge>
-                        <div className="flex items-center gap-1 text-slate-400">
-                          <Globe size={14} />
-                          <span className="text-[10px] font-bold uppercase tracking-widest">{exam.applicable_countries.length} Countries</span>
-                        </div>
                       </div>
                     </div>
 
-                    {exam.applicable_countries.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-8">
-                        {exam.applicable_countries.slice(0, 3).map((country: string) => (
-                          <span key={country} className="text-[10px] font-black bg-slate-50 text-slate-500 px-3 py-1 rounded-lg">
-                            {country}
-                          </span>
-                        ))}
-                      </div>
-                    )}
 
                     <div className="mt-auto">
                       <Link href={`/exams/${exam.slug}`}>
