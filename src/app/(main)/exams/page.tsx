@@ -170,7 +170,7 @@ export default function ExamsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredExams.map((exam) => (
-                <Card key={exam._id} className="group border border-gray-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
+                <Card key={exam._id} className="group border border-gray-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 py-0 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
                   {/* Hero Image */}
                   {exam.hero_section?.image && (
                     <div className="relative h-48 overflow-hidden">

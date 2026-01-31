@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useFormModal } from '@/context/FormModalContext'
 import FAQ from "@/app/Components/FAQ"
-import { 
+import {
   Calendar,
   Globe,
   Building,
@@ -109,7 +109,7 @@ const ExamPage = () => {
         setLoading(true)
         const response = await fetch(`/api/exams/${slug}`)
         const result = await response.json()
-        
+
         if (result.success) {
           setExam(result.data)
         } else {
@@ -130,13 +130,13 @@ const ExamPage = () => {
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['overview', 'registration', 'pattern', 'dates', 'results', 'faq']
-      
+
       for (const section of sections) {
         const element = document.getElementById(section)
         if (element) {
           const rect = element.getBoundingClientRect()
           const isVisible = rect.top <= 100 && rect.bottom >= 100
-          
+
           if (isVisible) {
             setActiveTab(section)
             break
@@ -147,7 +147,7 @@ const ExamPage = () => {
 
     window.addEventListener('scroll', handleScroll)
     handleScroll() // Check initial position
-    
+
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -181,7 +181,7 @@ const ExamPage = () => {
     )
   }
 
-  
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -209,7 +209,7 @@ const ExamPage = () => {
 
   const getAvailableTabs = () => {
     return tabs.filter((tab: any) => {
-      switch(tab.id) {
+      switch (tab.id) {
         case 'overview': return exam?.overview
         case 'registration': return exam?.registration
         case 'pattern': return exam?.exam_pattern
@@ -230,7 +230,7 @@ const ExamPage = () => {
           <div className="absolute inset-0 opacity-20" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
           }} />
-          
+
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Left Content */}
@@ -246,26 +246,26 @@ const ExamPage = () => {
                     {exam.frequency}
                   </Badge>
                 </div>
-                
+
                 <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-tight">
                   {exam.hero_section?.title || exam.name}
                 </h1>
-                
+
                 {exam.hero_section?.subtitle && (
                   <p className="text-xl text-white/90 mb-8 max-w-2xl leading-relaxed font-medium">
                     {exam.hero_section.subtitle}
                   </p>
                 )}
-                
+
                 <div className="flex flex-wrap gap-4">
-                  <Button 
+                  <Button
                     onClick={openModal}
                     className="bg-white text-green-700 hover:bg-green-50 font-black rounded-2xl h-14 px-8 text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                     Get Expert Guidance
                   </Button>
                   <Link href="/exams">
-                    <Button 
+                    <Button
                       variant="outline"
                       className="border-white/30 text-black hover:bg-white/10 font-black rounded-2xl h-14 px-8 text-lg backdrop-blur-sm"
                     >
@@ -275,15 +275,15 @@ const ExamPage = () => {
                   </Link>
                 </div>
               </div>
-              
+
               {/* Right Image */}
               <div className="relative">
                 {exam.hero_section.image ? (
                   <div className="relative group">
                     <div className="absolute -inset-4 bg-white/10 backdrop-blur-sm rounded-3xl group-hover:scale-105 transition-transform duration-500" />
                     <div className="relative bg-white rounded-3xl overflow-hidden shadow-2xl">
-                      <img 
-                        src={exam.hero_section.image} 
+                      <img
+                        src={exam.hero_section.image}
                         alt={exam.name}
                         className="w-full h-80 lg:h-96 object-cover"
                       />
@@ -330,11 +330,10 @@ const ExamPage = () => {
                 <button
                   key={tab.id}
                   onClick={() => scrollToSection(tab.id)}
-                  className={`tab-button ${
-                    activeTab === tab.id
+                  className={`tab-button ${activeTab === tab.id
                       ? 'tab-button-active'
                       : 'tab-button-inactive'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
@@ -345,11 +344,11 @@ const ExamPage = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto  px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 gap-8">
           {/* Main Content */}
           <div className="col-span-1 space-y-8">
-            
+
             {/* Overview Section */}
             {exam.overview && (
               <div id="overview" className="scroll-mt-24">
@@ -369,7 +368,7 @@ const ExamPage = () => {
                           {exam.overview.content}
                         </p>
                       </div>
-                      
+
                       {exam.overview.key_highlights.length > 0 && (
                         <div>
                           <h3 className="text-lg font-bold text-slate-900 mb-4">Key Highlights</h3>
@@ -400,7 +399,7 @@ const ExamPage = () => {
                       <div className="absolute inset-0 opacity-30" style={{
                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
                       }} />
-                      
+
                       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
                         {/* Left Content */}
                         <div className="flex flex-col justify-center">
@@ -414,15 +413,15 @@ const ExamPage = () => {
                             {exam.registration.description}
                           </p>
                         </div>
-                        
+
                         {/* Right Image */}
                         <div className="relative">
                           {exam.registration.image ? (
                             <div className="relative group">
                               <div className="absolute -inset-3 bg-white/10 backdrop-blur-sm rounded-2xl group-hover:scale-105 transition-transform duration-500" />
                               <div className="relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl border border-white/20">
-                                <img 
-                                  src={exam.registration.image} 
+                                <img
+                                  src={exam.registration.image}
                                   alt={exam.registration.title}
                                   className="w-full h-48 lg:h-56 object-cover"
                                 />
@@ -445,7 +444,7 @@ const ExamPage = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="p-8">
                       {exam.registration.bullet_points && exam.registration.bullet_points.length > 0 && (
                         <div className="space-y-3">
@@ -479,11 +478,11 @@ const ExamPage = () => {
                       </div>
                       <h2 className="text-2xl font-black text-slate-900">{exam.exam_pattern.title}</h2>
                     </div>
-                    
+
                     <p className="text-slate-700 leading-relaxed font-medium mb-6">
                       {exam.exam_pattern.description}
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                       <div className="text-center p-6 bg-purple-50 rounded-xl">
                         <Timer className="w-8 h-8 text-purple-600 mx-auto mb-3" />
@@ -503,7 +502,7 @@ const ExamPage = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     {exam.exam_pattern.table_data.length > 0 && (
                       <div>
                         <h3 className="text-lg font-bold text-slate-900 mb-4">Section-wise Breakdown</h3>
@@ -545,7 +544,7 @@ const ExamPage = () => {
                       </div>
                       <h2 className="text-2xl font-black text-slate-900">{exam.exam_dates.title}</h2>
                     </div>
-                    
+
                     {exam.exam_dates.important_dates.length > 0 && (
                       <div className="overflow-x-auto">
                         <table className="w-full border-collapse">
@@ -580,7 +579,7 @@ const ExamPage = () => {
               </div>
             )}
 
-     
+
 
             {/* Result Statistics Section */}
             {exam.result_statistics && (
@@ -593,11 +592,11 @@ const ExamPage = () => {
                       </div>
                       <h2 className="text-2xl font-black text-slate-900">{exam.result_statistics.title}</h2>
                     </div>
-                    
+
                     <p className="text-slate-700 leading-relaxed font-medium mb-6">
                       {exam.result_statistics.description}
                     </p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                       <div className="text-center p-6 bg-slate-50 rounded-xl">
                         <p className="text-3xl font-black text-slate-900 mb-2">{exam.result_statistics.total_marks}</p>
