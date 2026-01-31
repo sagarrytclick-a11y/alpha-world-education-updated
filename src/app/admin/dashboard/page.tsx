@@ -1,99 +1,44 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Globe, GraduationCap, FileText, MoreHorizontal, ChevronRight, Activity, FileCheck, Loader2 } from 'lucide-react'
+import { useAdminDashboardStats } from '@/hooks/useAdminDashboard'
+import { useAdminCountries, useAdminColleges } from '@/hooks/useAdminColleges'
+import { useAdminBlogs } from '@/hooks/useAdminBlogs'
 import { dummyCountries, dummyColleges, dummyBlogs } from '@/data/dummyData'
 
 export default function DashboardPage() {
-  const [loading, setLoading] = useState(true)
-  const [dbStats, setDbStats] = useState({
-    countries: 0,
-    colleges: 0,
-    blogs: 0,
-    exams: 0
-  })
-  const [countries, setCountries] = useState<any[]>([])
-  const [colleges, setColleges] = useState<any[]>([])
-  const [blogs, setBlogs] = useState<any[]>([])
-
-  useEffect(() => {
-    // Real Database Fetch
-    const fetchDashboardData = async () => {
-      try {
-        // Fetch stats and data in parallel
-        const [statsRes, countriesRes, collegesRes, blogsRes] = await Promise.all([
-          fetch('/api/admin/stats'),
-          fetch('/api/admin/countries'),
-          fetch('/api/admin/colleges'),
-          fetch('/api/admin/blogs')
-        ])
-
-        const statsResult = await statsRes.json()
-        const countriesResult = await countriesRes.json()
-        const collegesResult = await collegesRes.json()
-        const blogsResult = await blogsRes.json()
-
-        if (statsResult.success) {
-          console.log("🚀 Database Stats Loaded:", statsResult.data)
-          setDbStats(statsResult.data)
-        }
-
-        if (countriesResult.success) {
-          setCountries(countriesResult.data)
-        }
-
-        if (collegesResult.success) {
-          setColleges(collegesResult.data)
-        }
-
-        if (blogsResult.success) {
-          setBlogs(blogsResult.data)
-        }
-
-        // If any API fails, fallback to dummy data
-        if (!statsResult.success || !countriesResult.success || !collegesResult.success || !blogsResult.success) {
-          console.warn("Some APIs failed, using fallback data")
-          setCountries(dummyCountries)
-          setColleges(dummyColleges)
-          setBlogs(dummyBlogs)
-          if (!statsResult.success) {
-            setDbStats({
-              countries: dummyCountries.length,
-              colleges: dummyColleges.length,
-              blogs: dummyBlogs.length,
-              exams: 12,
-            })
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error)
-        // Fallback to dummy data if fetch fails
-        setCountries(dummyCountries)
-        setColleges(dummyColleges)
-        setBlogs(dummyBlogs)
-        setDbStats({
-          countries: dummyCountries.length,
-          colleges: dummyColleges.length,
-          blogs: dummyBlogs.length,
-          exams: 12,
-        })
-      } finally {
-        setLoading(false)
+  // TanStack Query hooks
+  const { data: dbStats = { countries: 0, colleges: 0, blogs: 0, exams: 0 }, isLoading: statsLoading, error: statsError } = useAdminDashboardStats()
+  const { data: countries = [], isLoading: countriesLoading } = useAdminCountries()
+  const { data: colleges = [], isLoading: collegesLoading } = useAdminColleges()
+  const { data: blogs = [], isLoading: blogsLoading } = useAdminBlogs()
+  
+  // Overall loading state
+  const loading = statsLoading || countriesLoading || collegesLoading || blogsLoading
+  
+  // Fallback to dummy data if there are errors
+  const displayCountries = countries.length > 0 ? countries : dummyCountries
+  const displayColleges = colleges.length > 0 ? colleges : dummyColleges
+  const displayBlogs = blogs.length > 0 ? blogs : dummyBlogs
+  const displayStats = dbStats.countries > 0 || dbStats.colleges > 0 || dbStats.blogs > 0 || dbStats.exams > 0 
+    ? dbStats 
+    : {
+        countries: dummyCountries.length,
+        colleges: dummyColleges.length,
+        blogs: dummyBlogs.length,
+        exams: 12,
       }
-    }
-
-    fetchDashboardData()
-  }, [])
 
   const stats = [
     {
       title: 'Total Countries',
-      value: dbStats.countries,
+      value: displayStats.countries,
       description: 'Active destinations',
       icon: Globe,
       color: 'text-blue-600',
@@ -101,7 +46,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Total Colleges',
-      value: dbStats.colleges,
+      value: displayStats.colleges,
       description: 'Educational institutions',
       icon: GraduationCap,
       color: 'text-green-600',
@@ -109,7 +54,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Total Exams',
-      value: dbStats.exams,
+      value: displayStats.exams,
       description: 'Standardized tests',
       icon: FileCheck,
       color: 'text-orange-600',
@@ -117,7 +62,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Blog Posts',
-      value: dbStats.blogs,
+      value: displayStats.blogs,
       description: 'Published content',
       icon: FileText,
       color: 'text-purple-600',
@@ -239,8 +184,8 @@ export default function DashboardPage() {
                 <DialogContent>
                   <DialogHeader><DialogTitle>Active Countries List</DialogTitle></DialogHeader>
                   <ScrollArea className="h-80">
-                    {countries.map(c => (
-                      <div key={c._id || c.id} className="flex justify-between p-2 border-b">{c.name} <Badge className="bg-green-100 text-green-700">{c.is_active !== false ? 'Active' : 'Inactive'}</Badge></div>
+                    {displayCountries.map((c: any) => (
+                      <div key={(c as any)._id || (c as any).id} className="flex justify-between p-2 border-b">{c.name} <Badge className="bg-green-100 text-green-700">{(c as any).is_active !== false ? 'Active' : 'Inactive'}</Badge></div>
                     ))}
                   </ScrollArea>
                 </DialogContent>
@@ -248,10 +193,10 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
                 <div className="space-y-2">
-                  {countries.slice(0, 5).map((country) => (
-                    <div key={country._id || country.id} className="flex items-center justify-between text-sm">
+                  {displayCountries.slice(0, 5).map((country: any) => (
+                    <div key={(country as any)._id || (country as any).id} className="flex items-center justify-between text-sm">
                       <span>{country.flag || ''} {country.name}</span>
-                      <Badge variant="outline" className="text-[10px]">{country.is_active !== false ? 'Active' : 'Inactive'}</Badge>
+                      <Badge variant="outline" className="text-[10px]">{(country as any).is_active !== false ? 'Active' : 'Inactive'}</Badge>
                     </div>
                   ))}
                 </div>
@@ -269,13 +214,13 @@ export default function DashboardPage() {
                 <DialogContent className="max-w-2xl">
                   <DialogHeader><DialogTitle>All Blog Posts</DialogTitle></DialogHeader>
                   <ScrollArea className="h-80">
-                    {blogs.map((blog) => (
-                      <div key={blog._id || blog.id} className="p-3 border-b">
+                    {displayBlogs.map((blog: any) => (
+                      <div key={(blog as any)._id || (blog as any).id} className="p-3 border-b">
                         <h3 className="font-medium text-sm">{blog.title}</h3>
                         <p className="text-xs text-gray-600 mt-1">{blog.content?.substring(0, 100)}...</p>
                         <div className="flex items-center justify-between mt-2">
                           <Badge variant="secondary" className="text-xs">{blog.category}</Badge>
-                          <span className="text-xs text-gray-500">{new Date(blog.createdAt || blog.created_at).toLocaleDateString()}</span>
+                          <span className="text-xs text-gray-500">{new Date(blog.createdAt || (blog as any).created_at).toLocaleDateString()}</span>
                         </div>
                       </div>
                     ))}
@@ -285,8 +230,8 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {blogs.slice(0, 4).map((blog) => (
-                  <div key={blog._id || blog.id} className="space-y-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                {displayBlogs.slice(0, 4).map((blog: any) => (
+                  <div key={(blog as any)._id || (blog as any).id} className="space-y-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="text-sm font-medium line-clamp-1">{blog.title}</div>
                     <div className="text-xs text-gray-500">{blog.category}</div>
                   </div>
@@ -306,13 +251,13 @@ export default function DashboardPage() {
                 <DialogContent className="max-w-2xl">
                   <DialogHeader><DialogTitle>All Active Colleges</DialogTitle></DialogHeader>
                   <ScrollArea className="h-80">
-                    {colleges.map((college) => (
-                      <div key={college._id || college.id} className="p-3 border-b">
+                    {displayColleges.map((college: any) => (
+                      <div key={(college as any)._id || (college as any).id} className="p-3 border-b">
                         <h3 className="font-medium text-sm">{college.name}</h3>
-                        <p className="text-xs text-gray-600">{college.country_ref?.name || college.country}</p>
+                        <p className="text-xs text-gray-600">{(college as any).country_ref?.name || (college as any).country}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-sm font-medium text-green-600">${college.fees?.toLocaleString()}/year</span>
-                          <Badge className="bg-green-100 text-green-700 text-xs">{college.is_active !== false ? 'Active' : 'Inactive'}</Badge>
+                          <span className="text-sm font-medium text-green-600">${(college as any).fees?.toLocaleString()}/year</span>
+                          <Badge className="bg-green-100 text-green-700 text-xs">{(college as any).is_active !== false ? 'Active' : 'Inactive'}</Badge>
                         </div>
                       </div>
                     ))}
@@ -322,10 +267,10 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {colleges.slice(0, 4).map((college) => (
-                  <div key={college._id || college.id} className="space-y-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                {displayColleges.slice(0, 4).map((college: any) => (
+                  <div key={(college as any)._id || (college as any).id} className="space-y-1 p-2 rounded-lg hover:bg-gray-50 transition-colors">
                     <div className="text-sm font-medium truncate">{college.name}</div>
-                    <div className="text-xs text-gray-500">${college.fees?.toLocaleString()}/year</div>
+                    <div className="text-xs text-gray-500">${(college as any).fees?.toLocaleString()}/year</div>
                   </div>
                 ))}
               </div>

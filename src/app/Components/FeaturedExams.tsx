@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import {
   MapPin, Trophy, DollarSign, Calendar, ArrowUpRight,
   FileText, Award, Clock, CheckCircle, Building2, User, MessageCircle, Eye,
@@ -32,6 +33,48 @@ interface ExamCardProps {
   frequency?: string;
   description?: string;
   slug: string;
+}
+
+interface College {
+  _id: string;
+  name: string;
+  slug: string;
+  country_ref: any;
+  exams: string[];
+  fees?: number;
+  duration?: string;
+  establishment_year?: string;
+  ranking?: string | {
+    title: string;
+    description: string;
+    country_ranking: string;
+    world_ranking: string;
+    accreditation: string[];
+  };
+  banner_url?: string;
+  about_content?: string;
+  is_active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Exam {
+  _id: string;
+  name: string;
+  slug: string;
+  short_name: string;
+  exam_type: string;
+  conducting_body: string;
+  exam_mode: string;
+  frequency: string;
+  description: string;
+  hero_section?: {
+    title: string;
+    subtitle?: string;
+    image?: string;
+  };
+  is_active: boolean;
+  display_order: number;
 }
 
 interface BlogCardProps {
@@ -433,131 +476,147 @@ const ExamsSection = ({
   </section>
 );
 
+// --- Custom Hooks ---
+
+const useFeaturedData = () => {
+  // Fetch colleges
+  const { 
+    data: collegesData, 
+    isLoading: collegesLoading, 
+    error: collegesError 
+  } = useQuery({
+    queryKey: ['featured-colleges'],
+    queryFn: async () => {
+      const response = await fetch('/api/colleges');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch colleges');
+      }
+      return result.data.colleges || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+  });
+
+  // Fetch exams
+  const { 
+    data: examsData, 
+    isLoading: examsLoading, 
+    error: examsError 
+  } = useQuery({
+    queryKey: ['featured-exams'],
+    queryFn: async () => {
+      const response = await fetch('/api/exams');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to fetch exams');
+      }
+      return result.data;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+  });
+
+  // Transform colleges data
+  const universities = React.useMemo(() => {
+    if (!collegesData) return [];
+    
+    return collegesData.map((college: College) => ({
+      name: college.name,
+      image: college.banner_url || '',
+      location: college.country_ref?.city || '',
+      ranking: typeof college.ranking === 'object' && college.ranking?.country_ranking 
+        ? `Country #${college.ranking.country_ranking}${college.ranking.world_ranking ? ` | World #${college.ranking.world_ranking}` : ''}`
+        : college.ranking,
+      fees: college.fees,
+      duration: college.duration,
+      establishment_year: college.establishment_year,
+      slug: college.slug,
+      country: college.country_ref?.name,
+      about: college.about_content
+    }));
+  }, [collegesData]);
+
+  // Transform exams data
+  const exams = React.useMemo(() => {
+    if (!examsData) return [];
+    
+    return examsData.map((exam: Exam) => ({
+      name: exam.name,
+      short_name: exam.short_name,
+      exam_type: exam.exam_type,
+      conducting_body: exam.conducting_body,
+      exam_mode: exam.exam_mode,
+      frequency: exam.frequency,
+      description: exam.description,
+      slug: exam.slug
+    }));
+  }, [examsData]);
+
+  const isLoading = collegesLoading || examsLoading;
+  const error = collegesError || examsError;
+
+  return {
+    universities,
+    exams,
+    isLoading,
+    error
+  };
+};
+
 // --- Main Section Component ---
 
 export default function FeaturedSection() {
-  // Universities state
-  const [universities, setUniversities] = React.useState<UniversityCardProps[]>([]);
-  const [allUniversities, setAllUniversities] = React.useState<UniversityCardProps[]>([]);
-  const [universitiesLoading, setUniversitiesLoading] = React.useState(true);
-  const [universitiesLoadingMore, setUniversitiesLoadingMore] = React.useState(false);
+  const { universities, exams, isLoading, error } = useFeaturedData();
+  
   const [universitiesDisplayCount, setUniversitiesDisplayCount] = React.useState(6);
-
-  // Exams state
-  const [exams, setExams] = React.useState<ExamCardProps[]>([]);
-  const [allExams, setAllExams] = React.useState<ExamCardProps[]>([]);
-  const [examsLoading, setExamsLoading] = React.useState(true);
-  const [examsLoadingMore, setExamsLoadingMore] = React.useState(false);
   const [examsDisplayCount, setExamsDisplayCount] = React.useState(6);
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch both universities and exams in parallel
-        const [uniRes, examRes] = await Promise.all([
-          fetch("/api/colleges"),
-          fetch("/api/exams")
-        ]);
-
-        const [uniData, examData] = await Promise.all([
-          uniRes.json(),
-          examRes.json()
-        ]);
-
-        // Transform and set universities data
-        if (uniData.success) {
-          const transformedUniversities = uniData.data.colleges?.map((u: any) => ({
-            name: u.name,
-            image: u.banner_url,
-            location: u.city,
-            ranking: typeof u.ranking === 'object' && u.ranking?.country_ranking 
-              ? `Country #${u.ranking.country_ranking}${u.ranking.world_ranking ? ` | World #${u.ranking.world_ranking}` : ''}`
-              : u.ranking,
-            fees: u.fees,
-            duration: u.duration,
-            establishment_year: u.establishment_year,
-            slug: u.slug,
-            country: u.country_ref?.name,
-            about: u.about_content
-          })) || [];
-
-          setAllUniversities(transformedUniversities);
-          setUniversities(transformedUniversities.slice(0, 6));
-        }
-
-        // Transform and set exams data
-        if (examData.success) {
-          const transformedExams = examData.data.map((e: any) => ({
-            name: e.name,
-            short_name: e.short_name,
-            exam_type: e.exam_type,
-            conducting_body: e.conducting_body,
-            exam_mode: e.exam_mode,
-            frequency: e.frequency,
-            description: e.description,
-            slug: e.slug
-          }));
-
-          setAllExams(transformedExams);
-          setExams(transformedExams.slice(0, 6));
-        }
-      } catch (err) {
-        console.error("Failed to fetch data:", err);
-      } finally {
-        setUniversitiesLoading(false);
-        setExamsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const loadMoreUniversities = async () => {
-    try {
-      setUniversitiesLoadingMore(true);
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const newDisplayCount = universitiesDisplayCount + 6;
-      setUniversitiesDisplayCount(newDisplayCount);
-      setUniversities(allUniversities.slice(0, newDisplayCount));
-    } catch (error) {
-      console.error("Failed to load more universities:", error);
-    } finally {
-      setUniversitiesLoadingMore(false);
-    }
+  const loadMoreUniversities = () => {
+    setUniversitiesDisplayCount(prev => prev + 6);
   };
 
-  const loadMoreExams = async () => {
-    try {
-      setExamsLoadingMore(true);
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const newDisplayCount = examsDisplayCount + 6;
-      setExamsDisplayCount(newDisplayCount);
-      setExams(allExams.slice(0, newDisplayCount));
-    } catch (error) {
-      console.error("Failed to load more exams:", error);
-    } finally {
-      setExamsLoadingMore(false);
-    }
+  const loadMoreExams = () => {
+    setExamsDisplayCount(prev => prev + 6);
   };
+
+  // Slice data for display
+  const displayedUniversities = universities.slice(0, universitiesDisplayCount);
+  const displayedExams = exams.slice(0, examsDisplayCount);
+
+  if (error) {
+    console.error('Featured section error:', error);
+    return (
+      <div className="space-y-24 py-24 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="text-red-500 font-bold">Failed to load featured content</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-24 py-24 bg-white overflow-hidden">
       <UniversitiesSection
-        universities={universities}
-        allUniversities={allUniversities}
-        loading={universitiesLoading}
-        loadingMore={universitiesLoadingMore}
+        universities={displayedUniversities}
+        allUniversities={universities}
+        loading={isLoading}
+        loadingMore={false}
         loadMoreUniversities={loadMoreUniversities}
       />
       <ExamsSection
-        exams={exams}
-        allExams={allExams}
-        loading={examsLoading}
-        loadingMore={examsLoadingMore}
+        exams={displayedExams}
+        allExams={exams}
+        loading={isLoading}
+        loadingMore={false}
         loadMoreExams={loadMoreExams}
       />
     </div>

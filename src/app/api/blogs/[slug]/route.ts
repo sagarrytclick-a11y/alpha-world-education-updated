@@ -9,7 +9,8 @@ export async function GET(
   try {
     await connectDB();
     const { slug } = await params;
-    const blog = await Blog.findOne({ slug, is_active: true });
+    const blog = await Blog.findOne({ slug, is_active: true })
+      .lean(); // Use lean() for better performance
     
     if (!blog) {
       return NextResponse.json(
@@ -21,11 +22,21 @@ export async function GET(
       );
     }
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Blog fetched successfully",
       data: blog,
     });
+    
+    // Add caching headers for individual blog data
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=600, stale-while-revalidate=900'
+    );
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=900');
+    response.headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=900');
+    
+    return response;
   } catch (error) {
     console.error("Error fetching blog:", error);
     return NextResponse.json(

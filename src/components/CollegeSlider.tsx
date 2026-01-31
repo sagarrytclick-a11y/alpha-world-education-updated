@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Building2 } from 'lucide-react'
 import CollegeCard from '@/app/Components/CollegeCard'
+import { useQuery } from '@tanstack/react-query'
 
 interface College {
   _id: string
@@ -26,32 +27,36 @@ interface CollegeSliderProps {
   countryId?: string // Make optional since we're fetching all colleges
 }
 
-const CollegeSlider: React.FC<CollegeSliderProps> = ({ countryId }) => {
-  const [colleges, setColleges] = useState<College[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentIndex, setCurrentIndex] = useState(0)
-
-  useEffect(() => {
-    const fetchColleges = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('/api/colleges') // Remove country filter
-        const result = await response.json()
-        
-        if (result.success) {
-          setColleges(result.data.colleges || [])
-        } else {
-          console.error('Failed to fetch colleges:', result.message)
-        }
-      } catch (error) {
-        console.error('Error fetching colleges:', error)
-      } finally {
-        setLoading(false)
-      }
+const fetchColleges = async (): Promise<College[]> => {
+    const response = await fetch('/api/colleges', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
-
-    fetchColleges() // Remove countryId dependency
-  }, []) // Remove countryId from dependency array
+    
+    const result = await response.json()
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch colleges')
+    }
+    
+    return result.data.colleges || [];
+  };
+  
+  const CollegeSlider: React.FC<CollegeSliderProps> = ({ countryId }) => {
+  const { data: colleges = [], isLoading, isError, error } = useQuery({
+    queryKey: ['college-slider', countryId],
+    queryFn: fetchColleges,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+  
+  const [currentIndex, setCurrentIndex] = useState(0)
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) >= Math.ceil(colleges.length / 3) ? 0 : prev + 1)
@@ -61,7 +66,24 @@ const CollegeSlider: React.FC<CollegeSliderProps> = ({ countryId }) => {
     setCurrentIndex((prev) => (prev - 1) < 0 ? Math.ceil(colleges.length / 3) - 1 : prev - 1)
   }
 
-  if (loading) {
+  if (isError) {
+    return (
+      <div className="py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <div className="w-16 h-16 text-red-500 mx-auto mb-4">
+              <Building2 size={48} />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Error Loading Colleges</h3>
+            <p className="text-slate-500 font-medium">{error?.message}</p>
+            <p className="text-slate-500 mt-2">Please try again later.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isLoading) {
     return (
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4">

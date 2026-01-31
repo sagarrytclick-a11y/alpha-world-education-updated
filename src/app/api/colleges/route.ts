@@ -54,9 +54,10 @@ export async function GET(request: Request) {
       .populate('country_ref', 'name slug flag')
       .sort({ ranking: 1, name: 1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean(); // Use lean() for better performance
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Colleges fetched successfully",
       data: {
@@ -68,6 +69,16 @@ export async function GET(request: Request) {
         hasNext: skip + limit < total
       },
     });
+    
+    // Add caching headers
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=180, stale-while-revalidate=300'
+    );
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=300');
+    response.headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=300');
+    
+    return response;
   } catch (error) {
     console.error("Error fetching colleges:", error);
     return NextResponse.json(

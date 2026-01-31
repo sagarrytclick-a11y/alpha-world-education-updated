@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { AdminTable, createEditAction, createDeleteAction, createViewAction } from '@/components/admin/AdminTable'
 import { AdminModal } from '@/components/admin/AdminModal'
 import { AdminForm } from '@/components/admin/AdminForm'
@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/select'
 import { Plus, FileText, Search, Eye } from 'lucide-react'
 import { generateSlug } from '@/lib/slug'
+import { useAdminBlogs, useSaveBlog, useDeleteBlog } from '@/hooks/useAdminBlogs'
+import { toast } from 'sonner'
 
 export interface Blog {
   _id: string
@@ -32,17 +34,18 @@ export interface Blog {
 }
 
 export default function BlogsPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([])
-  const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [blogToDelete, setBlogToDelete] = useState<Blog | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [dataLoading, setDataLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  
+  // TanStack Query hooks
+  const { data: blogs = [], isLoading: dataLoading } = useAdminBlogs()
+  const saveBlogMutation = useSaveBlog()
+  const deleteBlogMutation = useDeleteBlog()
   
   const [formData, setFormData] = useState({
     title: '',
@@ -55,32 +58,9 @@ export default function BlogsPage() {
     is_active: true
   })
 
-  // Fetch blogs from API
-  useEffect(() => {
-    fetchBlogs()
-  }, [])
 
-  const fetchBlogs = async () => {
-    try {
-      setDataLoading(true)
-      const response = await fetch('/api/admin/blogs')
-      const result = await response.json()
-      
-      if (result.success) {
-        setBlogs(result.data)
-        setFilteredBlogs(result.data)
-      } else {
-        console.error('Failed to fetch blogs:', result.message)
-      }
-    } catch (error) {
-      console.error('Error fetching blogs:', error)
-    } finally {
-      setDataLoading(false)
-    }
-  }
-
-  // Filter blogs based on search, category, and status
-  React.useEffect(() => {
+  // Filter blogs based on search, category, and status using useMemo
+  const filteredBlogs = useMemo(() => {
     let filtered = blogs
 
     if (selectedCategory !== 'all') {
@@ -98,7 +78,7 @@ export default function BlogsPage() {
       )
     }
 
-    setFilteredBlogs(filtered)
+    return filtered
   }, [blogs, searchTerm, selectedCategory, selectedStatus])
 
   const columns = [
@@ -260,62 +240,33 @@ export default function BlogsPage() {
   }
 
   const handleSaveBlog = async () => {
-    setLoading(true)
-    
     try {
-      const url = editingBlog ? `/api/admin/blogs/${editingBlog._id}` : '/api/admin/blogs'
-      const method = editingBlog ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        await fetchBlogs() // Refresh data
-        setIsModalOpen(false)
-      } else {
-        console.error('Failed to save blog:', result.message)
-        alert('Failed to save blog: ' + result.message)
+      const payload = {
+        ...formData,
+        ...(editingBlog && { _id: editingBlog._id })
       }
+      
+      await saveBlogMutation.mutateAsync(payload)
+      toast.success(editingBlog ? 'Blog post updated successfully!' : 'Blog post created successfully!')
+      setIsModalOpen(false)
+      setEditingBlog(null)
     } catch (error) {
       console.error('Error saving blog:', error)
-      alert('Error saving blog')
-    } finally {
-      setLoading(false)
+      toast.error('Error saving blog: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 
   const handleDeleteBlog = async () => {
     if (!blogToDelete) return
     
-    setLoading(true)
-    
     try {
-      const response = await fetch(`/api/admin/blogs/${blogToDelete._id}`, {
-        method: 'DELETE'
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        await fetchBlogs() // Refresh data
-        setDeleteModalOpen(false)
-        setBlogToDelete(null)
-      } else {
-        console.error('Failed to delete blog:', result.message)
-        alert('Failed to delete blog: ' + result.message)
-      }
+      await deleteBlogMutation.mutateAsync(blogToDelete._id)
+      toast.success('Blog post deleted successfully!')
+      setDeleteModalOpen(false)
+      setBlogToDelete(null)
     } catch (error) {
       console.error('Error deleting blog:', error)
-      alert('Error deleting blog')
-    } finally {
-      setLoading(false)
+      toast.error('Error deleting blog')
     }
   }
 
@@ -394,7 +345,7 @@ export default function BlogsPage() {
           title={editingBlog ? 'Edit Blog Post' : 'Create New Blog Post'}
           description={editingBlog ? 'Update blog post information' : 'Create a new blog post'}
           onConfirm={handleSaveBlog}
-          loading={loading}
+          loading={saveBlogMutation.isPending}
           size="xl"
         >
           <AdminForm
@@ -410,7 +361,7 @@ export default function BlogsPage() {
                 } : {})
               }))
             }}
-            loading={loading}
+            loading={saveBlogMutation.isPending}
           />
         </AdminModal>
 
@@ -423,7 +374,7 @@ export default function BlogsPage() {
           confirmText="Delete"
           cancelText="Cancel"
           onConfirm={handleDeleteBlog}
-          loading={loading}
+          loading={deleteBlogMutation.isPending}
           size="sm"
         >
           <div className="flex items-center space-x-2 text-sm text-gray-600">

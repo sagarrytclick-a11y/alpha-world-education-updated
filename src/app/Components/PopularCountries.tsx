@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MapPin, Globe, ArrowRight, GraduationCap, Zap, Compass, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 const CountryCard = ({ country }: { country: any }) => (
   <Link href={`/countries/${country.slug}`} className="group block h-full">
@@ -69,27 +70,40 @@ const CountryCard = ({ country }: { country: any }) => (
 );
 
 const PopularCountries = () => {
-  const [countries, setCountries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const res = await fetch("/api/countries");
-        const data = await res.json();
-        setCountries(data.success && data.data ? data.data.slice(0, 6) : []);
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCountries();
-  }, []);
-
-  // Use your actual data or these improved fallback objects
-  const displayCountries = countries.length > 0 ? countries : [
+  
+  // Define the fetch function
+  const fetchCountries = async () => {
+    const response = await fetch('/api/countries', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+      
+    const result = await response.json()
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch countries')
+    }
+      
+    // Return only the first 6 countries as per original implementation
+    return result.data.slice(0, 6);
+  };
+  
+  const { data: countries = [], isLoading, isError, error } = useQuery({
+    queryKey: ['popular-countries'],
+    queryFn: fetchCountries,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+  
+  // Fallback data in case of error
+  const fallbackCountries = [
     { name: 'Australia', flag: '🇦🇺', slug: 'australia', description: 'Experience a high standard of living and world-class education in the Land Down Under.' },
     { name: 'Canada', flag: '🇨🇦', slug: 'canada', description: 'Famous for its diverse culture and friendly immigration policies for international students.' },
     { name: 'United Kingdom', flag: '🇬🇧', slug: 'united-kingdom', description: 'Home to historic institutions and a global hub for innovation and research.' },
@@ -97,6 +111,9 @@ const PopularCountries = () => {
     { name: 'Germany', flag: '🇩🇪', slug: 'germany', description: 'Excellent education system with low or no tuition fees for international students.' },
     { name: 'France', flag: '🇫🇷', slug: 'france', description: 'Rich cultural heritage combined with prestigious educational institutions.' }
   ];
+
+  // Use your actual data or these improved fallback objects
+  const displayCountries = countries.length > 0 ? countries : fallbackCountries;
 
   const nextSlide = () => {
     const maxIndex = Math.max(0, displayCountries.length - (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1));
@@ -112,6 +129,42 @@ const PopularCountries = () => {
     const maxIndex = Math.max(0, displayCountries.length - (window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1));
     setCurrentIndex(Math.min(index, maxIndex));
   };
+
+  if (isError) {
+    return (
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 bg-white">
+        {/* Background Glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-green-50/30 blur-[120px] rounded-full -z-10" />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-center mb-12 sm:mb-16 gap-6">
+          <div className="text-center">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[0.9] tracking-tighter mb-4 sm:mb-6">
+              CHOOSE YOUR <br /><span className="text-green-600">DESTINATION</span>
+            </h2>
+            <p className="text-slate-500 font-semibold text-base sm:text-lg max-w-md mx-auto">
+              We help you navigate the best study spots across the globe with expert insights.
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <p className="text-red-500 text-lg">Failed to load countries: {error?.message}</p>
+          <p className="text-slate-500 mt-4">Displaying sample countries instead:</p>
+        </div>
+
+        {/* Display fallback countries when error occurs */}
+        <div className="overflow-hidden mt-8">
+          <div className="flex transition-transform duration-500 ease-in-out gap-4 sm:gap-6">
+            {fallbackCountries.map((country, index) => (
+              <div key={index} className="w-full flex-shrink-0 md:w-1/2 lg:w-1/3">
+                <CountryCard country={country} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 bg-white">
@@ -131,7 +184,7 @@ const PopularCountries = () => {
 
       {/* Slider Container */}
       <div className="relative">
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="h-[400px] rounded-[2rem] bg-slate-50 animate-pulse border border-slate-100" />
@@ -145,7 +198,7 @@ const PopularCountries = () => {
                 className="flex transition-transform duration-500 ease-in-out gap-4 sm:gap-6"
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
               >
-                {displayCountries.map((country, index) => (
+                {displayCountries.map((country: any, index: number) => (
                   <div key={index} className="w-full flex-shrink-0 md:w-1/2 lg:w-1/3">
                     <CountryCard country={country} />
                   </div>

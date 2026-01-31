@@ -10,6 +10,7 @@ import { useFormModal } from '@/context/FormModalContext'
 import FAQ from "@/app/Components/FAQ"
 import { SITE_CONTACT } from '@/config/site-config'
 import { useContactInfo } from "@/hooks/useContactInfo";
+import { useCollege } from '@/hooks/useColleges'
 
 import {
   MapPin,
@@ -128,9 +129,6 @@ interface CollegeDetailPageProps {
 }
 
 const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
-  const [college, setCollege] = useState<College | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [isExpanded, setIsExpanded] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { openModal } = useFormModal()
@@ -140,38 +138,16 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
   }, []);
 
   const { phones, emails } = useContactInfo();
+  
+  // Use TanStack Query for college data
+  const { 
+    data: college, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useCollege(slug);
 
-  useEffect(() => {
-    const fetchCollege = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const response = await fetch(`/api/colleges/${slug}`)
-        const result = await response.json()
-
-        if (!result.success) {
-          if (response.status === 404) {
-            notFound()
-          }
-          throw new Error(result.message || 'Failed to fetch college')
-        }
-
-        setCollege(result.data)
-      } catch (error) {
-        console.error('Error fetching college:', error)
-        setError(error instanceof Error ? error.message : 'Failed to fetch college')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (slug) {
-      fetchCollege()
-    }
-  }, [slug])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -185,17 +161,29 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
   if (error || !college) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto px-4">
           <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <Info className="w-10 h-10 text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">College Not Found</h2>
-          <p className="text-slate-500 mb-6">{error || 'The college you are looking for does not exist.'}</p>
-          <Link href="/colleges">
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
-              Browse All Colleges
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            {error instanceof Error && error.message === 'College not found' ? 'College Not Found' : 'Failed to Load College'}
+          </h2>
+          <p className="text-slate-500 mb-6">
+            {error instanceof Error ? error.message : 'The college you are looking for does not exist.'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              onClick={() => refetch()}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Try Again
             </Button>
-          </Link>
+            <Link href="/colleges">
+              <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                Browse All Colleges
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     )

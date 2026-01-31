@@ -15,6 +15,7 @@ import {
   GraduationCap,
   ArrowRight
 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 
 interface College {
   _id: string
@@ -54,33 +55,57 @@ interface RelatedCollegesProps {
   currentCollegeSlug: string
 }
 
-export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesProps) {
-  const [colleges, setColleges] = useState<College[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchRelatedColleges()
-  }, [currentCollegeSlug])
-
-  const fetchRelatedColleges = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/colleges/${currentCollegeSlug}/related`)
-      const result = await response.json()
-
-      if (result.success) {
-        setColleges(result.data)
-      } else {
-        console.error('Failed to fetch related colleges:', result.message)
-      }
-    } catch (error) {
-      console.error('Error fetching related colleges:', error)
-    } finally {
-      setLoading(false)
+const fetchRelatedColleges = async (slug: string): Promise<College[]> => {
+    const response = await fetch(`/api/colleges/${slug}/related`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
+    
+    const result = await response.json()
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch related colleges')
+    }
+    
+    return result.data;
+  };
+  
+  export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesProps) {
+  const { data: colleges = [], isLoading, isError, error } = useQuery({
+    queryKey: ['related-colleges', currentCollegeSlug],
+    queryFn: () => fetchRelatedColleges(currentCollegeSlug),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isError) {
+    return (
+      <div className="text-center py-20 bg-gradient-to-br from-slate-50 to-slate-100 rounded-[3rem] border-2 border-dashed border-slate-200">
+        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <GraduationCap className="w-10 h-10 text-red-500" />
+        </div>
+        <h3 className="text-2xl font-bold text-slate-900 mb-3">Error Loading Related Colleges</h3>
+        <p className="text-slate-500 mb-4">{error?.message}</p>
+        <p className="text-slate-500 mb-8 max-w-md mx-auto">
+          Please try again later or explore our complete collection of top-ranked universities
+        </p>
+        <Link href="/colleges">
+          <Button className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-2xl h-14 flex items-center gap-3 transition-all duration-300 group">
+            Explore All Colleges
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </Link>
+      </div>
+    )
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {[1, 2, 3].map((i) => (
