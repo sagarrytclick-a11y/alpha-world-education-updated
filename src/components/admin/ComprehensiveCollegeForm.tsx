@@ -271,7 +271,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                   {(data.exams || []).map((exam, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1">
                       {exam}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index, data.exams || [], 'exams')} />
+                      <X className="h-3 w-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); removeTag(index, data.exams || [], 'exams'); }} />
                     </Badge>
                   ))}
                 </div>
@@ -375,7 +375,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                   {(data.key_highlights_features || []).map((feature, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1">
                       {feature}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index, data.key_highlights_features || [], 'key_highlights_features')} />
+                      <X className="h-3 w-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); removeTag(index, data.key_highlights_features || [], 'key_highlights_features'); }} />
                     </Badge>
                   ))}
                 </div>
@@ -445,7 +445,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                         <div className="font-medium">{feature.title}</div>
                         <div className="text-sm text-gray-600">{feature.description}</div>
                       </div>
-                      <X className="h-4 w-4 cursor-pointer text-red-500" onClick={() => removeFeatureObject(index, data.why_choose_us_features || [], 'why_choose_us_features')} />
+                      <X className="h-4 w-4 cursor-pointer text-red-500" onClick={(e) => { e.stopPropagation(); removeFeatureObject(index, data.why_choose_us_features || [], 'why_choose_us_features'); }} />
                     </div>
                   ))}
                 </div>
@@ -530,7 +530,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                   {(data.accreditation || []).map((acc, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1">
                       {acc}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index, data.accreditation || [], 'accreditation')} />
+                      <X className="h-3 w-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); removeTag(index, data.accreditation || [], 'accreditation'); }} />
                     </Badge>
                   ))}
                 </div>
@@ -590,7 +590,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                   {(data.admission_process_steps || []).map((step, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1">
                       {step}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index, data.admission_process_steps || [], 'admission_process_steps')} />
+                      <X className="h-3 w-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); removeTag(index, data.admission_process_steps || [], 'admission_process_steps'); }} />
                     </Badge>
                   ))}
                 </div>
@@ -650,7 +650,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                   {(data.documents_required_documents || []).map((doc, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1">
                       {doc}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index, data.documents_required_documents || [], 'documents_required_documents')} />
+                      <X className="h-3 w-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); removeTag(index, data.documents_required_documents || [], 'documents_required_documents'); }} />
                     </Badge>
                   ))}
                 </div>
@@ -729,7 +729,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                         <div className="text-sm text-gray-600">{course.duration}</div>
                         <div className="text-sm font-medium">{course.annual_tuition_fee}</div>
                       </div>
-                      <X className="h-4 w-4 cursor-pointer text-red-500 ml-2" onClick={() => removeCourse(index, data.fees_structure_courses || [], 'fees_structure_courses')} />
+                      <X className="h-4 w-4 cursor-pointer text-red-500 ml-2" onClick={(e) => { e.stopPropagation(); removeCourse(index, data.fees_structure_courses || [], 'fees_structure_courses'); }} />
                     </div>
                   ))}
                 </div>
@@ -791,7 +791,7 @@ export function ComprehensiveCollegeForm({ data, countries, onChange, loading = 
                   {(data.campus_highlights_highlights || []).map((highlight, index) => (
                     <Badge key={index} variant="secondary" className="flex items-center gap-1">
                       {highlight}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeTag(index, data.campus_highlights_highlights || [], 'campus_highlights_highlights')} />
+                      <X className="h-3 w-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); removeTag(index, data.campus_highlights_highlights || [], 'campus_highlights_highlights'); }} />
                     </Badge>
                   ))}
                 </div>

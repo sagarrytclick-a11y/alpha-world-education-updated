@@ -301,10 +301,15 @@ export default function CollegesPage() {
       key: 'ranking',
       title: 'Ranking',
       render: (value: string) => {
-        if (!value) return '-'
+        if (!value || value === 'N/A' || value === 'n/a') return value || '-'
+        
+        // Check if it's a simple string that's not JSON
+        if (typeof value === 'string' && !value.startsWith('{') && !value.startsWith('[')) {
+          return value
+        }
         
         try {
-          const rankingData = typeof value === 'string' ? JSON.parse(value) : value
+          const rankingData = typeof value === 'string' ? JSON.parse(value.trim()) : value
           
           return (
             <div className="space-y-1">
