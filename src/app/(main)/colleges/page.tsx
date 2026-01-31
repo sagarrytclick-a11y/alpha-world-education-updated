@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Image from 'next/image'
 import { getCountrySlug } from "@/lib/normalize"
 import Link from 'next/link'
@@ -10,7 +10,8 @@ import { getCountryName } from "@/lib/normalize"
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, MapPin, DollarSign, Clock, GraduationCap, Building, Filter, X, ArrowRight, Loader2 } from 'lucide-react'
+import { Search, MapPin, DollarSign, Clock, GraduationCap, Building, Filter, X, ArrowRight, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { useInfiniteColleges } from '@/hooks/useColleges'
 
 interface College {
   _id: string
@@ -30,19 +31,31 @@ interface College {
 }
 
 export default function CollegesPage() {
-  const [colleges, setColleges] = useState<College[]>([])
-  const [filteredColleges, setFilteredColleges] = useState<College[]>([])
-  const [loading, setLoading] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCountry, setSelectedCountry] = useState<string>('all')
   const [selectedExam, setSelectedExam] = useState<string>('all')
-  const [totalCount, setTotalCount] = useState(0)
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
-
+  
   const observer = useRef<IntersectionObserver | null>(null)
-  const lastCollegeRef = useRef<HTMLDivElement>(null)
+  
+  // Use TanStack Query for infinite scroll
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useInfiniteColleges(debouncedSearchTerm, selectedCountry, selectedExam)
+  
+  // Flatten all pages for rendering
+  const colleges = useMemo(() => 
+    data?.pages.flatMap(page => page.colleges) || [], [data]
+  )
+  
+  const totalCount = data?.pages[0]?.total || 0
 
   // Debounce search term (wait 500ms after user stops typing)
   useEffect(() => {
@@ -53,107 +66,74 @@ export default function CollegesPage() {
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Initial load and when filters change (using debounced search)
-  useEffect(() => {
-    setPage(1)
-    setColleges([])
-    fetchColleges(1, true)
-  }, [debouncedSearchTerm, selectedCountry, selectedExam])
-
   // Setup intersection observer for infinite scroll
-  useEffect(() => {
-    const options = {
-      root: null,
+  const lastCollegeRef = useCallback((node: HTMLDivElement | null) => {
+    if (isFetchingNextPage) return
+    if (observer.current) observer.current.disconnect()
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage()
+      }
+    }, {
       rootMargin: '100px',
       threshold: 0.1
-    }
+    })
+    
+    if (node) observer.current.observe(node)
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage])
 
-    const callback = (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries
-      if (entry.isIntersecting && hasMore && !loading) {
-        setPage(prev => prev + 1)
-      }
-    }
-
-    observer.current = new IntersectionObserver(callback, options)
-    if (lastCollegeRef.current) {
-      observer.current.observe(lastCollegeRef.current)
-    }
-
-    return () => {
-      if (observer.current) {
-        observer.current.disconnect()
-      }
-    }
-  }, [hasMore, loading])
-
-  // Load more data when page changes
-  useEffect(() => {
-    if (page > 1) {
-      fetchColleges(page, false)
-    }
-  }, [page])
-
-  const fetchColleges = async (pageNum: number, isNewSearch: boolean = false) => {
-    try {
-      setLoading(true)
-
-      const params = new URLSearchParams({
-        page: pageNum.toString(),
-        limit: '12',
-        ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
-        ...(selectedCountry !== 'all' && { country: selectedCountry }),
-        ...(selectedExam !== 'all' && { exam: selectedExam })
-      })
-
-      const response = await fetch(`/api/colleges?${params}`)
-      const result = await response.json()
-
-      if (result.success) {
-        const newColleges = result.data.colleges || []
-        const total = result.data.total || 0
-
-        if (isNewSearch) {
-          setColleges(newColleges)
-          setFilteredColleges(newColleges)
-        } else {
-          setColleges(prev => [...prev, ...newColleges])
-          setFilteredColleges(prev => [...prev, ...newColleges])
-        }
-
-        setTotalCount(total)
-        setHasMore(newColleges.length === 12 && colleges.length + newColleges.length < total)
-      }
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const countries = [
-    ...new Set(
+  // Extract unique countries and exams from colleges for filters
+  const { countries, exams } = useMemo(() => {
+    const countrySet = new Set(
       colleges
         .map(college => {
           const c = college.country_ref
-
-          if (!c) return null                 // handles null / undefined
+          if (!c) return null
           if (typeof c === "string") return c
           if (typeof c === "object") return c.name ?? null
-
           return null
         })
-        .filter(Boolean) // remove nulls
-    ),
-  ]
-  const exams = [...new Set(colleges.flatMap(college => college.exams))]
+        .filter(Boolean)
+    )
+    
+    const examSet = new Set(colleges.flatMap(college => college.exams))
+    
+    return {
+      countries: Array.from(countrySet),
+      exams: Array.from(examSet)
+    }
+  }, [colleges])
 
-  if (loading && colleges.length === 0) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-green-100 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading Excellence...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to Load Colleges</h2>
+          <p className="text-slate-500 mb-6">
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </p>
+          <Button 
+            onClick={() => refetch()}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
         </div>
       </div>
     )
@@ -240,7 +220,7 @@ export default function CollegesPage() {
 
         {/* Colleges Grid */}
         <div className="py-12 pointer-events-auto">
-          {filteredColleges.length === 0 ? (
+          {colleges.length === 0 ? (
             <div className="text-center py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200">
               <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search size={32} className="text-slate-300" />
@@ -250,10 +230,10 @@ export default function CollegesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredColleges.map((college, index) => (
+              {colleges.map((college, index) => (
                 <div
                   key={college._id}
-                  ref={index === filteredColleges.length - 1 ? lastCollegeRef : null}
+                  ref={index === colleges.length - 1 ? lastCollegeRef : null}
                 >
                   <Card className="group border-none py-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2.5rem] overflow-hidden bg-white flex flex-col h-full">
                     {/* Image Header */}
@@ -264,6 +244,7 @@ export default function CollegesPage() {
                         width={600}
                         height={400}
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
 
@@ -295,7 +276,7 @@ export default function CollegesPage() {
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Yearly Fees</span>
                           <div className="flex items-center text-green-600 font-black text-lg">
                             <DollarSign size={16} />
-                            <span>{college.fees.toLocaleString()}</span>
+                            <span>{college.fees?.toLocaleString() || 'N/A'}</span>
                           </div>
                         </div>
                         <div className="flex flex-col gap-1">
@@ -331,7 +312,7 @@ export default function CollegesPage() {
           )}
 
           {/* Loading indicator for infinite scroll */}
-          {loading && colleges.length > 0 && (
+          {isFetchingNextPage && (
             <div className="flex justify-center py-8">
               <div className="flex items-center gap-3 text-slate-500">
                 <Loader2 className="w-6 h-6 animate-spin" />
@@ -341,7 +322,7 @@ export default function CollegesPage() {
           )}
 
           {/* End of results indicator */}
-          {!hasMore && colleges.length > 0 && (
+          {!hasNextPage && colleges.length > 0 && (
             <div className="text-center py-8">
               <p className="text-slate-500 font-medium">
                 Showing all {colleges.length} colleges

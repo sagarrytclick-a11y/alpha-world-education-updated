@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { AdminTable, createEditAction, createDeleteAction } from '@/components/admin/AdminTable'
 import { AdminModal } from '@/components/admin/AdminModal'
 import { ComprehensiveCollegeForm } from '@/components/admin/ComprehensiveCollegeForm'
@@ -17,6 +17,8 @@ import {
 import { Plus, GraduationCap, Search, Filter } from 'lucide-react'
 import { dummyCountries } from '@/data/dummyData'
 import { generateSlug } from '@/lib/slug'
+import { useAdminColleges, useAdminCountries, useSaveCollege, useDeleteCollege } from '@/hooks/useAdminColleges'
+import { toast } from 'sonner'
 
 interface AdminCountry {
   _id: string
@@ -92,16 +94,18 @@ export interface College {
 }
 
 export default function CollegesPage() {
-  const [colleges, setColleges] = useState<College[]>([])
-  const [filteredColleges, setFilteredColleges] = useState<College[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCollege, setEditingCollege] = useState<College | null>(null)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [collegeToDelete, setCollegeToDelete] = useState<College | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [dataLoading, setDataLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCountry, setSelectedCountry] = useState<string>('all')
+  
+  // TanStack Query hooks
+  const { data: colleges = [], isLoading: dataLoading, error: collegesError } = useAdminColleges()
+  const { data: countries = dummyCountries } = useAdminCountries()
+  const saveCollegeMutation = useSaveCollege()
+  const deleteCollegeMutation = useDeleteCollege()
   
   const [formData, setFormData] = useState({
     // Basic Info
@@ -153,50 +157,9 @@ export default function CollegesPage() {
     campus_highlights_description: '',
     campus_highlights_highlights: [] as string[],
   })
-  const [countries, setCountries] = useState(dummyCountries)
 
-  // Fetch colleges and countries from API
-  useEffect(() => {
-    fetchColleges()
-    fetchCountries()
-  }, [])
-
-  const fetchColleges = async () => {
-    try {
-      setDataLoading(true)
-      const response = await fetch('/api/admin/colleges')
-      const result = await response.json()
-      
-      if (result.success) {
-        setColleges(result.data)
-        setFilteredColleges(result.data)
-      } else {
-        console.error('Failed to fetch colleges:', result.message)
-      }
-    } catch (error) {
-      console.error('Error fetching colleges:', error)
-    } finally {
-      setDataLoading(false)
-    }
-  }
-
-  const fetchCountries = async () => {
-    try {
-      const response = await fetch('/api/admin/countries')
-      const result = await response.json()
-      
-      if (result.success) {
-        setCountries(result.data)
-      } else {
-        console.error('Failed to fetch countries:', result.message)
-      }
-    } catch (error) {
-      console.error('Error fetching countries:', error)
-    }
-  }
-
-  // Filter colleges based on search and country
-  React.useEffect(() => {
+  // Filter colleges based on search and country using useMemo
+  const filteredColleges = useMemo(() => {
     let filtered = colleges
 
     if (selectedCountry !== 'all') {
@@ -215,7 +178,7 @@ export default function CollegesPage() {
       )
     }
 
-    setFilteredColleges(filtered)
+    return filtered
   }, [colleges, searchTerm, selectedCountry])
 
   const columns = [
@@ -503,8 +466,6 @@ export default function CollegesPage() {
   }
 
   const handleSaveCollege = async () => {
-    setLoading(true)
-    
     try {
       console.log('🚀 Starting college save process...')
       console.log('📝 Form data:', formData)
@@ -563,20 +524,10 @@ export default function CollegesPage() {
       }
       
       if (validationErrors.length > 0) {
-        alert(`Please complete the following required fields:\n\n${validationErrors.map((error, index) => `${index + 1}. ${error}`).join('\n')}`)
-        setLoading(false)
+        toast.error(`Please complete the following required fields:\n\n${validationErrors.map((error, index) => `${index + 1}. ${error}`).join('\n')}`)
         return
       }
 
-      const isEditing = editingCollege !== null
-      const url = isEditing 
-        ? `/api/admin/colleges/${editingCollege._id}` 
-        : '/api/admin/colleges'
-      const method = isEditing ? 'PUT' : 'POST'
-      
-      console.log('🌐 API URL:', url)
-      console.log('🔧 HTTP Method:', method)
-      
       const payload = {
         name: formData.name,
         slug: formData.slug,
@@ -640,6 +591,9 @@ export default function CollegesPage() {
 
         // Legacy fields for backward compatibility
         about_content: formData.overview_description,
+        
+        // Include ID for editing
+        ...(editingCollege && { _id: editingCollege._id })
       }
       
       console.log('📦 Request payload:', payload)
@@ -650,69 +604,30 @@ export default function CollegesPage() {
         accreditation: typeof payload.ranking.accreditation
       })
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      })
+      await saveCollegeMutation.mutateAsync(payload)
       
-      const result = await response.json()
-      
-      if (!response.ok) {
-        console.error('❌ API Error:', result)
-        
-        // Handle specific country not found error
-        if (result.message === 'Country not found' && result.availableCountries) {
-          const countryList = result.availableCountries.map((c: { flag: string; name: string; slug: string }) => `${c.flag} ${c.name} (${c.slug})`).join('\n')
-          alert(`Country not found! Available countries:\n\n${countryList}\n\nPlease select a valid country from the dropdown.`)
-        } else {
-          alert(`Error: ${result.message || 'Failed to save college'}`)
-        }
-        return
-      }
-      
-      console.log('✅ Success:', result)
-      
-      await fetchColleges()
+      toast.success(editingCollege ? 'College updated successfully!' : 'College created successfully!')
       setIsModalOpen(false)
       setEditingCollege(null)
       
     } catch (error) {
       console.error('❌ Error saving college:', error)
       console.error('💥 Error stack:', error instanceof Error ? error.stack : 'No stack available')
-      alert('Error saving college: ' + (error instanceof Error ? error.message : 'Unknown error'))
-    } finally {
-      setLoading(false)
+      toast.error('Error saving college: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 
   const handleDeleteCollege = async () => {
     if (!collegeToDelete) return
     
-    setLoading(true)
-    
     try {
-      const response = await fetch(`/api/admin/colleges/${collegeToDelete._id}`, {
-        method: 'DELETE'
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        await fetchColleges() // Refresh data
-        setDeleteModalOpen(false)
-        setCollegeToDelete(null)
-      } else {
-        console.error('Failed to delete college:', result.message)
-        alert('Failed to delete college: ' + result.message)
-      }
+      await deleteCollegeMutation.mutateAsync(collegeToDelete._id)
+      toast.success('College deleted successfully!')
+      setDeleteModalOpen(false)
+      setCollegeToDelete(null)
     } catch (error) {
       console.error('Error deleting college:', error)
-      alert('Error deleting college')
-    } finally {
-      setLoading(false)
+      toast.error('Error deleting college')
     }
   }
 
@@ -780,14 +695,14 @@ export default function CollegesPage() {
           title={editingCollege ? 'Edit College' : 'Add New College'}
           description={editingCollege ? 'Update college information' : 'Add a new college to the system'}
           onConfirm={handleSaveCollege}
-          loading={loading}
+          loading={saveCollegeMutation.isPending}
           size="xl"
         >
           <ComprehensiveCollegeForm
             data={formData}
             countries={countries.map((c, index) => ({ 
               ...c, 
-              _id: c.id || `country-${index}` 
+              _id: (c as any)._id || (c as any).id || `country-${index}` 
             }))}
             onChange={(field: string, value: any) => {
               setFormData(prev => ({ 
@@ -799,7 +714,7 @@ export default function CollegesPage() {
                 } : {})
               }))
             }}
-            loading={loading}
+            loading={saveCollegeMutation.isPending}
           />
         </AdminModal>
 
@@ -812,7 +727,7 @@ export default function CollegesPage() {
           confirmText="Delete"
           cancelText="Cancel"
           onConfirm={handleDeleteCollege}
-          loading={loading}
+          loading={deleteCollegeMutation.isPending}
           size="sm"
         >
           <div className="flex items-center space-x-2 text-sm text-gray-600">

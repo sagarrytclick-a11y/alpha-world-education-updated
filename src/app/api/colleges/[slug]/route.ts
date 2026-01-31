@@ -13,7 +13,7 @@ export async function GET(
     
     const college = await College.findOne({ slug, is_active: true })
       .populate('country_ref')
-      .lean();
+      .lean(); // Use lean() for better performance
 
     if (!college) {
       return NextResponse.json(
@@ -25,11 +25,21 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "College fetched successfully",
       data: college,
     });
+    
+    // Add caching headers for individual college data
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=600, stale-while-revalidate=900'
+    );
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=900');
+    response.headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=900');
+    
+    return response;
   } catch (error) {
     console.error("Error fetching college:", error);
     return NextResponse.json(

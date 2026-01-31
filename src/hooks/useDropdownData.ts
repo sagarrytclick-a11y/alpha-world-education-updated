@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 interface College {
   _id: string
@@ -28,56 +28,75 @@ interface DropdownData {
   error: string | null
 }
 
+const fetchColleges = async (): Promise<College[]> => {
+  const response = await fetch('/api/colleges')
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  const result = await response.json()
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to fetch colleges')
+  }
+  return result.data.colleges?.slice(0, 8) || []
+}
+
+const fetchExams = async (): Promise<Exam[]> => {
+  const response = await fetch('/api/exams')
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  const result = await response.json()
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to fetch exams')
+  }
+  return result.data
+}
+
+const fetchCountries = async (): Promise<Country[]> => {
+  const response = await fetch('/api/countries')
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  const result = await response.json()
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to fetch countries')
+  }
+  return result.data
+}
+
 export function useDropdownData(): DropdownData {
-  const [data, setData] = useState<DropdownData>({
-    colleges: [],
-    exams: [],
-    countries: [],
-    loading: true,
-    error: null
+  const collegesQuery = useQuery({
+    queryKey: ['dropdown-colleges'],
+    queryFn: fetchColleges,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 2,
   })
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [collegesRes, examsRes, countriesRes] = await Promise.all([
-          fetch('/api/colleges'),
-          fetch('/api/exams'),
-          fetch('/api/countries')
-        ])
+  const examsQuery = useQuery({
+    queryKey: ['dropdown-exams'],
+    queryFn: fetchExams,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes
+    retry: 2,
+  })
 
-        const [collegesData, examsData, countriesData] = await Promise.all([
-          collegesRes.json(),
-          examsRes.json(),
-          countriesRes.json()
-        ])
+  const countriesQuery = useQuery({
+    queryKey: ['dropdown-countries'],
+    queryFn: fetchCountries,
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 45 * 60 * 1000, // 45 minutes
+    retry: 2,
+  })
 
-        setData({
-          colleges: collegesData.success
-            ? collegesData.data.colleges?.slice(0, 8) || []
-            : [],
-          exams: examsData.success
-            ? examsData.data
-            : [],
-          countries: countriesData.success
-            ? countriesData.data
-            : [],
-          loading: false,
-          error: null
-        })
-      } catch (error) {
-        console.error('Error fetching dropdown data:', error)
-        setData(prev => ({
-          ...prev,
-          loading: false,
-          error: 'Failed to load data'
-        }))
-      }
-    }
+  const isLoading = collegesQuery.isLoading || examsQuery.isLoading || countriesQuery.isLoading
+  const error = collegesQuery.error || examsQuery.error || countriesQuery.error
 
-    fetchData()
-  }, [])
-
-
-  return data
+  return {
+    colleges: collegesQuery.data || [],
+    exams: examsQuery.data || [],
+    countries: countriesQuery.data || [],
+    loading: isLoading,
+    error: error instanceof Error ? error.message : null
+  }
 }

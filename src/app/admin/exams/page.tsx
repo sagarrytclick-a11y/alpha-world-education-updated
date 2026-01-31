@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { AdminTable } from '@/components/admin/AdminTable'
 import { AdminModal } from '@/components/admin/AdminModal'
 import { AdminForm } from '@/components/admin/AdminForm'
@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
 import { generateSlug } from '@/lib/slug'
+import { useAdminExams, useSaveExam, useDeleteExam } from '@/hooks/useAdminExams'
+import { toast } from 'sonner'
 
 // Function to generate small format slug
 const generateSmallSlug = (text: string): string => {
@@ -88,10 +90,8 @@ interface Exam {
 }
 
 export default function SimpleExamsPage() {
-  const [exams, setExams] = useState<Exam[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingExam, setEditingExam] = useState<Exam | null>(null)
-  const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('basic')
 
   const [formData, setFormData] = useState<Exam>({
@@ -140,54 +140,30 @@ export default function SimpleExamsPage() {
       passing_marks: 40
     }
   })
+  
+  // TanStack Query hooks
+  const { data: exams = [], isLoading: dataLoading } = useAdminExams()
+  const saveExamMutation = useSaveExam()
+  const deleteExamMutation = useDeleteExam()
 
-  const fetchExams = async () => {
-    try {
-      const response = await fetch('/api/admin/exams')
-      const result = await response.json()
-      if (result.success) {
-        setExams(result.data)
-      }
-    } catch (error) {
-      console.error('Error fetching exams:', error)
-    }
-  }
-
-  useEffect(() => {
-    fetchExams()
-  }, [])
 
   const handleSaveExam = async () => {
     console.log('=== EXAM DATA ===')
     console.log(JSON.stringify(formData, null, 2))
     
-    setLoading(true)
     try {
-      const url = editingExam ? `/api/admin/exams/${editingExam._id}` : '/api/admin/exams'
-      const method = editingExam ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-      
-      const result = await response.json()
-      if (result.success) {
-        await fetchExams()
-        setIsModalOpen(false)
-        alert('✅ Exam saved successfully!')
-      } else {
-        if (result.errors && Array.isArray(result.errors)) {
-          alert('❌ Validation Errors:\n\n' + result.errors.join('\n'))
-        } else {
-          alert('❌ Failed to save exam: ' + result.message)
-        }
+      const payload = {
+        ...formData,
+        ...(editingExam && { _id: editingExam._id })
       }
+      
+      await saveExamMutation.mutateAsync(payload)
+      toast.success('Exam saved successfully!')
+      setIsModalOpen(false)
+      setEditingExam(null)
     } catch (error) {
-      alert('❌ Error saving exam')
-    } finally {
-      setLoading(false)
+      console.error('Error saving exam:', error)
+      toast.error('Error saving exam: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 
@@ -371,11 +347,10 @@ export default function SimpleExamsPage() {
               onClick={async () => {
                 if (confirm(`Are you sure you want to delete "${record.name}"?`)) {
                   try {
-                    await fetch(`/api/admin/exams/${record._id}`, { method: 'DELETE' })
-                    await fetchExams()
-                    alert('✅ Exam deleted successfully!')
+                    await deleteExamMutation.mutateAsync(record._id!)
+                    toast.success('Exam deleted successfully!')
                   } catch (error) {
-                    alert('❌ Error deleting exam')
+                    toast.error('Error deleting exam')
                   }
                 }
               }}
@@ -837,8 +812,8 @@ export default function SimpleExamsPage() {
           <Button variant="outline" onClick={() => setIsModalOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSaveExam} disabled={loading}>
-            {loading ? 'Saving...' : 'Save Exam'}
+          <Button onClick={handleSaveExam} disabled={saveExamMutation.isPending}>
+            {saveExamMutation.isPending ? 'Saving...' : 'Save Exam'}
           </Button>
         </div>
       </AdminModal>

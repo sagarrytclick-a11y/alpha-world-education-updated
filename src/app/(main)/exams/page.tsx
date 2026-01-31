@@ -1,14 +1,15 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Globe, Calendar, Building, Clock, FileText, ArrowRight, X, LayoutGrid } from 'lucide-react'
+import { Search, Globe, Calendar, Building, Clock, FileText, ArrowRight, X, LayoutGrid, AlertCircle, RefreshCw } from 'lucide-react'
 import FAQ from "@/app/Components/FAQ"
+import { useExams } from '@/hooks/useExams'
 
 interface Exam {
   _id: string
@@ -30,53 +31,78 @@ interface Exam {
 }
 
 export default function ExamsPage() {
-  const [exams, setExams] = useState<Exam[]>([])
-  const [filteredExams, setFilteredExams] = useState<Exam[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedMode, setSelectedMode] = useState<string>('all')
 
-  useEffect(() => { fetchExams() }, [])
+  const { 
+    data: exams = [], 
+    isLoading, 
+    error,
+    refetch 
+  } = useExams()
 
-  useEffect(() => {
+  const filteredExams = useMemo(() => {
     let filtered = exams
-    if (selectedType !== 'all') filtered = filtered.filter(exam => exam.exam_type === selectedType)
-    if (selectedMode !== 'all') filtered = filtered.filter(exam => exam.exam_mode === selectedMode)
+
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(exam => exam.exam_type === selectedType)
+    }
+
+    if (selectedMode !== 'all') {
+      filtered = filtered.filter(exam => exam.exam_mode === selectedMode)
+    }
+
     if (searchTerm) {
-      filtered = filtered.filter(exam => 
-        exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        exam.short_name.toLowerCase().includes(searchTerm.toLowerCase())
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(exam =>
+        exam.name.toLowerCase().includes(searchLower) ||
+        exam.short_name.toLowerCase().includes(searchLower) ||
+        exam.conducting_body.toLowerCase().includes(searchLower)
       )
     }
-    setFilteredExams(filtered)
+
+    return filtered
   }, [exams, searchTerm, selectedType, selectedMode])
 
-  const fetchExams = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/exams')
-      const result = await response.json()
-      if (result.success) {
-        setExams(result.data)
-        setFilteredExams(result.data)
-      }
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const examTypes = useMemo(() => [...new Set(exams.map(exam => exam.exam_type))], [exams])
+  const examModes = useMemo(() => [...new Set(exams.map(exam => exam.exam_mode))], [exams])
 
-  const examTypes = [...new Set(exams.map(exam => exam.exam_type))]
-  const examModes = [...new Set(exams.map(exam => exam.exam_mode))]
+  const resetFilters = useCallback(() => {
+    setSearchTerm('')
+    setSelectedType('all')
+    setSelectedMode('all')
+  }, [])
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-green-100 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading Exams...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to Load Exams</h2>
+          <p className="text-slate-500 mb-6">
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </p>
+          <Button
+            onClick={() => refetch()}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
         </div>
       </div>
     )
@@ -126,7 +152,7 @@ export default function ExamsPage() {
                 className="pl-12 bg-slate-50 border-none h-12 rounded-xl font-medium focus-visible:ring-2 focus-visible:ring-green-500"
               />
             </div>
-            
+
             <Select value={selectedType} onValueChange={setSelectedType}>
               <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-medium">
                 <SelectValue placeholder="Exam Type" />
@@ -147,9 +173,9 @@ export default function ExamsPage() {
               </SelectContent>
             </Select>
 
-            <Button 
-              variant="ghost" 
-              onClick={() => { setSearchTerm(''); setSelectedType('all'); setSelectedMode('all'); }}
+            <Button
+              variant="ghost"
+              onClick={resetFilters}
               className="h-12 text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-xl font-bold flex gap-2"
             >
               <X size={16} /> Reset Filters
@@ -174,10 +200,11 @@ export default function ExamsPage() {
                   {/* Hero Image */}
                   {exam.hero_section?.image && (
                     <div className="relative h-48 overflow-hidden">
-                      <img 
-                        src={exam.hero_section.image} 
+                      <img
+                        src={exam.hero_section.image}
                         alt={exam.hero_section.title || exam.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
@@ -195,9 +222,9 @@ export default function ExamsPage() {
                       {exam.name}
                     </CardTitle>
                     <div className="flex items-center gap-2 mt-2">
-                       <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-md">
+                      <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-md">
                         {exam.exam_type}
-                       </span>
+                      </span>
                     </div>
                   </CardHeader>
 
@@ -205,12 +232,12 @@ export default function ExamsPage() {
                     <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-8 font-medium">
                       {exam.description}
                     </p>
-                    
+
                     <div className="space-y-4 mb-8">
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2 text-slate-600 font-bold">
                           <Building size={16} className="text-green-600" />
-                          <span className="truncate max-w-[150px]">{exam.conducting_body}</span>
+                          <span className="truncate max-w-[150px]" title={exam.conducting_body}>{exam.conducting_body}</span>
                         </div>
                         <div className="flex items-center gap-2 text-slate-600 font-bold">
                           <Calendar size={16} className="text-green-600" />
@@ -219,17 +246,15 @@ export default function ExamsPage() {
                       </div>
 
                       <div className="flex items-center justify-between py-3 border-y border-slate-50">
-                        <Badge 
+                        <Badge
                           variant="outline"
-                          className={`text-[10px] font-black uppercase border-2 ${
-                            exam.exam_mode === 'Online' ? 'border-green-100 text-green-600' : 'border-slate-100 text-slate-500'
-                          }`}
+                          className={`text-[10px] font-black uppercase border-2 ${exam.exam_mode === 'Online' ? 'border-green-100 text-green-600' : 'border-slate-100 text-slate-500'
+                            }`}
                         >
                           Mode: {exam.exam_mode}
                         </Badge>
                       </div>
                     </div>
-
 
                     <div className="mt-auto">
                       <Link href={`/exams/${exam.slug}`}>

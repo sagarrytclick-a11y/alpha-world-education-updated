@@ -1,5 +1,6 @@
 "use client"
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   MapPin,
   Heart,
@@ -25,34 +26,29 @@ type College = {
   numberOfCourses?: string;
 };
 
-export default function FeaturedColleges() {
-  const [collegeData, setCollegeData] = useState<College[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchColleges = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+// Custom hook for fetching colleges
+const useColleges = () => {
+  return useQuery({
+    queryKey: ['colleges', 'featured'],
+    queryFn: async () => {
       const res = await fetch("/api/colleges");
       const data = await res.json();
       
       if (data.success && Array.isArray(data.colleges)) {
-        setCollegeData(data.colleges.slice(0, 6));
+        return data.colleges.slice(0, 6) as College[];
       } else {
-        setError("Failed to load colleges");
+        throw new Error("Failed to load colleges");
       }
-    } catch (error) {
-      console.error("Error fetching colleges:", error);
-      setError("Failed to load colleges");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+};
 
-  useEffect(() => {
-    fetchColleges();
-  }, []);
+export default function FeaturedColleges() {
+  const { data: collegeData, isLoading, error, refetch } = useColleges();
 
   return (
     <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-white via-green-50/20 to-slate-50 relative overflow-hidden">
@@ -68,7 +64,7 @@ export default function FeaturedColleges() {
 
         {/* Colleges Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {loading ? (
+          {isLoading ? (
             // Loading skeleton
             Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-100 shadow-lg animate-pulse">
@@ -83,15 +79,15 @@ export default function FeaturedColleges() {
             ))
           ) : error ? (
             <div className="col-span-full text-center py-12">
-              <p className="text-slate-500 mb-4">{error}</p>
+              <p className="text-slate-500 mb-4">{error instanceof Error ? error.message : 'Failed to load colleges'}</p>
               <button 
-                onClick={fetchColleges} 
+                onClick={() => refetch()} 
                 className="text-green-600 hover:text-green-700 font-medium"
               >
                 Try again
               </button>
             </div>
-          ) : collegeData.length === 0 ? (
+          ) : !collegeData || collegeData.length === 0 ? (
             <div className="col-span-full text-center py-12">
               <p className="text-slate-500">No colleges available at the moment.</p>
             </div>

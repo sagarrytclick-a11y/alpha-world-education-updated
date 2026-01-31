@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Calendar, Clock, ArrowRight, Tag, FileText, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
 
 interface BlogCardProps {
   title: string;
@@ -103,54 +104,60 @@ const BlogCard = ({ title, slug, category, content, tags, createdAt, image }: Bl
   );
 };
 
+const fetchBlogs = async (): Promise<BlogCardProps[]> => {
+  const response = await fetch('/api/blogs', {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+  
+  const result = await response.json()
+  if (!result.success) {
+    throw new Error(result.message || 'Failed to fetch blogs')
+  }
+  
+  // Transform API data to match BlogCard interface
+  return result.data.map((blog: any) => ({
+    title: blog.title,
+    slug: blog.slug,
+    category: blog.category || "Blog",
+    content: blog.content || "Read more about this blog post",
+    tags: blog.tags || [],
+    createdAt: blog.createdAt,
+    image: blog.image
+  }))
+}
+
 export default function LatestBlogs() {
-  const [blogs, setBlogs] = React.useState<BlogCardProps[]>([]);
+  const { data: blogs = [], isLoading, isError, error } = useQuery({
+    queryKey: ['latest-blogs'],
+    queryFn: fetchBlogs,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+
   const [displayedBlogs, setDisplayedBlogs] = React.useState<BlogCardProps[]>([]);
-  const [loading, setLoading] = React.useState(false);
   const [hasMore, setHasMore] = React.useState(true);
   const blogsPerPage = 6;
 
-React.useEffect(() => {
-  const fetchBlogs = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/blogs");
-      const result = await response.json();
-
-      const blogsArray = result.success && result.data 
-        ? result.data
-        : [];
-
-      // Transform API data to match BlogCard interface
-      const transformedBlogs = blogsArray.map((blog: any) => ({
-        title: blog.title,
-        slug: blog.slug,
-        category: blog.category || "Blog",
-        content: blog.content || "Read more about this blog post",
-        tags: blog.tags || [],
-        createdAt: blog.createdAt,
-        image: blog.image
-      }));
-
-      setBlogs(transformedBlogs);
-      
-      // Show first 6 blogs initially
-      const initialBlogs = transformedBlogs.slice(0, blogsPerPage);
+  // Initialize displayed blogs when data is loaded
+  React.useEffect(() => {
+    if (blogs.length > 0 && displayedBlogs.length === 0) {
+      const initialBlogs = blogs.slice(0, blogsPerPage);
       setDisplayedBlogs(initialBlogs);
-      setHasMore(transformedBlogs.length > blogsPerPage);
-    } catch (error) {
-      console.error("Failed to fetch blogs:", error);
-      setBlogs([]);
-      setDisplayedBlogs([]);
-    } finally {
-      setLoading(false);
+      setHasMore(blogs.length > blogsPerPage);
     }
-  };
-
-  fetchBlogs();
-}, []);
+  }, [blogs, displayedBlogs.length, blogsPerPage]);
 
   const loadMoreBlogs = () => {
+    if (isLoading) return; // Prevent loading more while already loading
+    
     const currentLength = displayedBlogs.length;
     const nextBlogs = blogs.slice(currentLength, currentLength + blogsPerPage);
     const newDisplayedBlogs = [...displayedBlogs, ...nextBlogs];
@@ -160,6 +167,24 @@ React.useEffect(() => {
   };
 
     
+
+  if (isError) {
+    return (
+      <section className="max-w-7xl mx-auto px-4 py-20 bg-white">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tighter">
+            LATEST <span className="text-green-600">BLOGS</span>
+          </h2>
+          <p className="text-slate-500 font-medium text-lg">
+            Educational insights, study tips, and success stories from our experts.
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-red-500 text-lg">Failed to load blogs: {error?.message}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-20 bg-white">
@@ -183,10 +208,10 @@ React.useEffect(() => {
         <div className="text-center mt-12">
           <Button 
             onClick={loadMoreBlogs}
-            disabled={loading}
+            disabled={isLoading}
             className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-4 rounded-full font-bold hover:bg-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? (
+            {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 Loading...

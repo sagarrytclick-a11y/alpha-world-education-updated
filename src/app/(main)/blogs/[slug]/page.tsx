@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -15,8 +15,11 @@ import {
   ArrowLeft, 
   Share2,
   Tag,
-  FileText
+  FileText,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react'
+import { useBlog } from '@/hooks/useBlogs'
 
 interface Blog {
   _id: string
@@ -40,34 +43,16 @@ interface Blog {
 const BlogDetailPage = () => {
   const params = useParams()
   const slug = params.slug as string
-  const [blog, setBlog] = useState<Blog | null>(null)
-  const [loading, setLoading] = useState(true)
+  
+  // Use TanStack Query for blog data
+  const { 
+    data: blog, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useBlog(slug)
 
-  useEffect(() => {
-    const fetchBlog = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/blogs/${slug}`)
-        const result = await response.json()
-        
-        if (result.success) {
-          setBlog(result.data)
-        } else {
-          console.error('Blog not found:', result.message)
-        }
-      } catch (error) {
-        console.error('Error fetching blog:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (slug) {
-      fetchBlog()
-    }
-  }, [slug])
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -78,20 +63,32 @@ const BlogDetailPage = () => {
     )
   }
 
-  if (!blog) {
+  if (error || !blog) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileText size={32} className="text-slate-300" />
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FileText size={32} className="text-red-500" />
           </div>
-          <h3 className="text-xl font-bold text-slate-900">Article not found</h3>
-          <p className="text-slate-500 font-medium">The article you're looking for doesn't exist.</p>
-          <Link href="/blogs">
-            <Button className="mt-4 bg-green-600 hover:bg-green-700">
-              Back to Articles
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            {error instanceof Error && error.message === 'Blog not found' ? 'Article not found' : 'Failed to Load Article'}
+          </h2>
+          <p className="text-slate-500 mb-6">
+            {error instanceof Error ? error.message : 'The article you are looking for does not exist.'}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button 
+              onClick={() => refetch()}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Try Again
             </Button>
-          </Link>
+            <Link href="/blogs">
+              <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                Back to Articles
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     )

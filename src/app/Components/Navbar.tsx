@@ -2,24 +2,27 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, Phone, Mail, MapPin, ChevronDown, ChevronRight } from "lucide-react";
+import { Menu, X, Phone, Mail, MapPin, ChevronDown, ChevronRight, AlertCircle, RefreshCw } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SITE_IDENTITY } from "@/site-identity";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useFormModal } from "@/context/FormModalContext";
 import { useDropdownData } from "@/hooks/useDropdownData";
+import { useCountryColleges } from "@/hooks/useCountryColleges";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
-  const [countryColleges, setCountryColleges] = useState<any[]>([]);
-  const [loadingColleges, setLoadingColleges] = useState(false);
   const { emails, phones, address } = useContactInfo();
   const pathname = usePathname();
   const { openModal } = useFormModal();
-  const { colleges, exams, countries, loading } = useDropdownData();
+  const { colleges, exams, countries, loading, error } = useDropdownData();
+  
+  // Use TanStack Query for country-specific colleges
+  const { data: countryColleges = [], isLoading: loadingColleges, error: countryCollegesError } = useCountryColleges(hoveredCountry);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -34,26 +37,7 @@ export default function Navbar() {
     }
   }, [hoveredItem]);
 
-  useEffect(() => {
-    if (hoveredCountry) {
-      fetchCollegesByCountry(hoveredCountry);
-    }
-  }, [hoveredCountry]);
-
-  const fetchCollegesByCountry = async (countrySlug: string) => {
-    try {
-      setLoadingColleges(true);
-      const response = await fetch(`/api/colleges?country=${countrySlug}`);
-      const result = await response.json();
-      if (result.success) {
-        setCountryColleges(result.data.colleges || []);
-      }
-    } catch (error) {
-      console.error('❌ Error fetching colleges:', error);
-    } finally {
-      setLoadingColleges(false);
-    }
-  };
+  // Remove the old fetchCollegesByCountry function as it's now handled by useCountryColleges hook
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -117,6 +101,11 @@ export default function Navbar() {
                     <div className={`absolute top-full left-1/2 transform -translate-x-1/2 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-[60] max-h-[60vh] overflow-x-auto overflow-y-hidden ${item.name === 'Countries' ? 'w-[40rem] max-w-[80vw]' : 'w-64 max-w-[90vw]'}`}>
                       {loading && (item.name === 'Colleges' || item.name === 'Exams') ? (
                         <div className="px-6 py-4 text-slate-500 text-center">Loading...</div>
+                      ) : error ? (
+                        <div className="px-6 py-4 text-red-500 text-center flex flex-col items-center gap-2">
+                          <AlertCircle size={16} />
+                          <span className="text-sm">Failed to load data</span>
+                        </div>
                       ) : item.name === 'Countries' ? (
                         <div className="flex h-full">
                           {/* LEFT COLUMN - COUNTRIES */}
@@ -161,6 +150,12 @@ export default function Navbar() {
                                   <div className="px-4 py-3 text-sm text-slate-500 flex items-center gap-2 justify-center">
                                     <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                                     <span className="font-medium">Searching universities...</span>
+                                  </div>
+                                ) : countryCollegesError ? (
+                                  <div className="px-4 py-8 text-center text-red-500">
+                                    <AlertCircle size={20} className="mx-auto mb-2" />
+                                    <p className="text-sm font-medium">Failed to load universities</p>
+                                    <p className="text-xs mt-1">Please try again</p>
                                   </div>
                                 ) : countryColleges.length > 0 ? (
                                   countryColleges.map((college) => (

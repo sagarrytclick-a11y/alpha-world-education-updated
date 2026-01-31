@@ -6,13 +6,24 @@ export async function GET() {
   try {
     await connectDB();
     const countries = await Country.find({ is_active: true })
-      .sort({ name: 1 });
+      .sort({ name: 1 })
+      .lean(); // Use lean() for better performance
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Countries fetched successfully",
       data: countries,
     });
+    
+    // Add caching headers
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=600, stale-while-revalidate=900'
+    );
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=900');
+    response.headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=900');
+    
+    return response;
   } catch (error) {
     console.error("Error fetching countries:", error);
     return NextResponse.json(

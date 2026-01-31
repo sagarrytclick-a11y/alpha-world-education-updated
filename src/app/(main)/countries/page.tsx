@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Globe, MapPin, GraduationCap, ArrowUpRight, Compass, Info, X } from 'lucide-react'
+import { Search, Globe, MapPin, GraduationCap, ArrowUpRight, Compass, Info, X, AlertCircle, RefreshCw } from 'lucide-react'
+import { useCountries } from '@/hooks/useCountries'
 
 interface Country {
   _id: string
@@ -16,44 +17,56 @@ interface Country {
 }
 
 export default function CountriesPage() {
-  const [countries, setCountries] = useState<Country[]>([])
-  const [filteredCountries, setFilteredCountries] = useState<Country[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('/api/countries')
-        const result = await response.json()
-        if (result.success) {
-          setCountries(result.data)
-          setFilteredCountries(result.data)
-        }
-      } catch (error) {
-        console.error('Error fetching countries:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchCountries()
-  }, [])
+  // Use TanStack Query for countries data
+  const { 
+    data: countries = [], 
+    isLoading, 
+    error, 
+    refetch 
+  } = useCountries()
 
-  useEffect(() => {
-    const filtered = countries.filter(country => 
-      country.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      country.description.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter countries based on search
+  const filteredCountries = useMemo(() => {
+    if (!searchTerm) return countries
+    
+    const searchLower = searchTerm.toLowerCase()
+    return countries.filter(country => 
+      country.name.toLowerCase().includes(searchLower) ||
+      (country.description && country.description.toLowerCase().includes(searchLower))
     )
-    setFilteredCountries(filtered)
-  }, [searchTerm, countries])
+  }, [countries, searchTerm])
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-green-100 border-t-green-600 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-900 font-black uppercase tracking-widest text-xs">Mapping Destinations...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to Load Destinations</h2>
+          <p className="text-slate-500 mb-6">
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </p>
+          <Button 
+            onClick={() => refetch()}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
         </div>
       </div>
     )

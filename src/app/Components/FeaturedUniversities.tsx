@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Trophy, DollarSign, Calendar, ArrowRight, CheckCircle2, Building2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 interface UniversityCardProps {
   name: string;
@@ -108,62 +109,60 @@ const UniversityCard = ({ name, image, location, ranking, fees, duration, establ
   );
 };
 
-export default function FeaturedUniversities() {
-  const [universities, setUniversities] = React.useState<UniversityCardProps[]>([]);
-  const [allUniversities, setAllUniversities] = React.useState<UniversityCardProps[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [loadingMore, setLoadingMore] = React.useState(false);
+const fetchUniversities = async (): Promise<UniversityCardProps[]> => {
+    const response = await fetch('/api/colleges', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
+    const result = await response.json()
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to fetch universities')
+    }
+    
+    // Transform API data to match UniversityCard interface
+    return result.data.map((university: any) => ({
+      name: university.name,
+      image: university.banner_url || "/next.svg",
+      location: university.city || "Location",
+      ranking: university.ranking,
+      fees: university.fees,
+      duration: university.duration,
+      establishment_year: university.establishment_year,
+      slug: university.slug,
+      country: university.country_ref?.name || "Country",
+      about: university.about_content,
+      exams: university.exams || []
+    }));
+  };
+  
+  export default function FeaturedUniversities() {
+  const { data: allUniversities = [], isLoading, isError, error } = useQuery({
+    queryKey: ['featured-universities'],
+    queryFn: fetchUniversities,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+  });
+  
   const [displayCount, setDisplayCount] = React.useState(6);
-
-  React.useEffect(() => {
-    const fetchUniversities = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/colleges");
-        const result = await response.json();
-
-        const universitiesArray = result.success && result.data 
-          ? result.data 
-          : [];
-
-        // Updated transformation to include new DB fields
-        const transformedUniversities = universitiesArray.map((university: any) => ({
-          name: university.name,
-          image: university.banner_url || "/next.svg",
-          location: university.city || "Location",
-          ranking: university.ranking,
-          fees: university.fees,
-          duration: university.duration,
-          establishment_year: university.establishment_year,
-          slug: university.slug,
-          country: university.country_ref?.name || "Country",
-          about: university.about_content,
-          exams: university.exams || []
-        }));
-
-        setAllUniversities(transformedUniversities);
-        setUniversities(transformedUniversities.slice(0, 6));
-      } catch (error) {
-        console.error("Failed to fetch universities:", error);
-        setUniversities([]);
-        setAllUniversities([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUniversities();
-  }, []);
+  const [loadingMore, setLoadingMore] = React.useState(false);
+  
+  // Slice universities based on display count
+  const universities = allUniversities.slice(0, displayCount);
 
   const loadMore = async () => {
     try {
       setLoadingMore(true);
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
       
       const newDisplayCount = displayCount + 6;
       setDisplayCount(newDisplayCount);
-      setUniversities(allUniversities.slice(0, newDisplayCount));
     } catch (error) {
       console.error("Failed to load more universities:", error);
     } finally {
@@ -182,8 +181,13 @@ export default function FeaturedUniversities() {
         </p>
       </div>
 
-      {/* Loading State */}
-      {loading ? (
+      {/* Error State */}
+      {isError ? (
+        <div className="text-center py-12">
+          <p className="text-red-500 text-lg">Failed to load universities: {error?.message}</p>
+          <p className="text-slate-500 mt-2">Please try again later.</p>
+        </div>
+      ) : isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[...Array(6)].map((_, index) => (
             <div key={index} className="animate-pulse">
@@ -210,7 +214,7 @@ export default function FeaturedUniversities() {
 
           {/* Load More / View All Buttons */}
           <div className="text-center mt-12 space-y-4">
-            {universities.length < allUniversities.length && (
+            {!isLoading && universities.length < allUniversities.length && (
               <button
                 onClick={loadMore}
                 disabled={loadingMore}

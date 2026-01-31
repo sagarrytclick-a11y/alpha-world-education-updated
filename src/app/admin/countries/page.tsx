@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { AdminTable, createEditAction, createDeleteAction } from '@/components/admin/AdminTable'
 import { AdminModal } from '@/components/admin/AdminModal'
 import { AdminForm } from '@/components/admin/AdminForm'
@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Plus, Globe } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { generateSlug } from '@/lib/slug'
+import { useAdminCountries, useSaveCountry, useDeleteCountry } from '@/hooks/useAdminCountries'
+import { toast } from 'sonner'
 
 export interface Country {
   _id: string
@@ -23,13 +25,10 @@ export interface Country {
 }
 
 export default function CountriesPage() {
-  const [countries, setCountries] = useState<Country[]>([])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCountry, setEditingCountry] = useState<Country | null>(null)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [countryToDelete, setCountryToDelete] = useState<Country | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [dataLoading, setDataLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -39,29 +38,12 @@ export default function CountriesPage() {
     meta_description: '',
     is_active: true
   })
+  
+  // TanStack Query hooks
+  const { data: countries = [], isLoading: dataLoading } = useAdminCountries()
+  const saveCountryMutation = useSaveCountry()
+  const deleteCountryMutation = useDeleteCountry()
 
-  // Fetch countries from API
-  useEffect(() => {
-    fetchCountries()
-  }, [])
-
-  const fetchCountries = async () => {
-    try {
-      setDataLoading(true)
-      const response = await fetch('/api/admin/countries')
-      const result = await response.json()
-      
-      if (result.success) {
-        setCountries(result.data)
-      } else {
-        console.error('Failed to fetch countries:', result.message)
-      }
-    } catch (error) {
-      console.error('Error fetching countries:', error)
-    } finally {
-      setDataLoading(false)
-    }
-  }
 
   const columns = [
     {
@@ -185,62 +167,33 @@ export default function CountriesPage() {
   }
 
   const handleSaveCountry = async () => {
-    setLoading(true)
-    
     try {
-      const url = editingCountry ? `/api/admin/countries/${editingCountry._id}` : '/api/admin/countries'
-      const method = editingCountry ? 'PUT' : 'POST'
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        await fetchCountries() // Refresh data
-        setIsModalOpen(false)
-      } else {
-        console.error('Failed to save country:', result.message)
-        alert('Failed to save country: ' + result.message)
+      const payload = {
+        ...formData,
+        ...(editingCountry && { _id: editingCountry._id })
       }
+      
+      await saveCountryMutation.mutateAsync(payload)
+      toast.success(editingCountry ? 'Country updated successfully!' : 'Country created successfully!')
+      setIsModalOpen(false)
+      setEditingCountry(null)
     } catch (error) {
       console.error('Error saving country:', error)
-      alert('Error saving country')
-    } finally {
-      setLoading(false)
+      toast.error('Error saving country: ' + (error instanceof Error ? error.message : 'Unknown error'))
     }
   }
 
   const handleDeleteCountry = async () => {
     if (!countryToDelete) return
     
-    setLoading(true)
-    
     try {
-      const response = await fetch(`/api/admin/countries/${countryToDelete._id}`, {
-        method: 'DELETE'
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        await fetchCountries() // Refresh data
-        setDeleteModalOpen(false)
-        setCountryToDelete(null)
-      } else {
-        console.error('Failed to delete country:', result.message)
-        alert('Failed to delete country: ' + result.message)
-      }
+      await deleteCountryMutation.mutateAsync(countryToDelete._id)
+      toast.success('Country deleted successfully!')
+      setDeleteModalOpen(false)
+      setCountryToDelete(null)
     } catch (error) {
       console.error('Error deleting country:', error)
-      alert('Error deleting country')
-    } finally {
-      setLoading(false)
+      toast.error('Error deleting country')
     }
   }
 
@@ -277,7 +230,7 @@ export default function CountriesPage() {
           title={editingCountry ? 'Edit Country' : 'Add New Country'}
           description={editingCountry ? 'Update country information' : 'Add a new country to the system'}
           onConfirm={handleSaveCountry}
-          loading={loading}
+          loading={saveCountryMutation.isPending}
           size="lg"
         >
           <AdminForm
@@ -293,7 +246,7 @@ export default function CountriesPage() {
                 } : {})
               }))
             }}
-            loading={loading}
+            loading={saveCountryMutation.isPending}
           />
         </AdminModal>
 
@@ -306,7 +259,7 @@ export default function CountriesPage() {
           confirmText="Delete"
           cancelText="Cancel"
           onConfirm={handleDeleteCountry}
-          loading={loading}
+          loading={deleteCountryMutation.isPending}
           size="sm"
         >
           <div className="flex items-center space-x-2 text-sm text-gray-600">

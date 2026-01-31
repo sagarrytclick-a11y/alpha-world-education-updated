@@ -4,6 +4,7 @@ import "./globals.css";
 import { SITE_IDENTITY } from "@/site-identity";
 import { FormModalProvider } from "@/context/FormModalContext";
 import { FormModal } from "@/components/FormModal";
+import { QueryProvider } from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,10 +57,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}>
-        <FormModalProvider>
-          {children}
-          <FormModal />
-        </FormModalProvider>
+        <QueryProvider>
+          <FormModalProvider>
+            {children}
+            <FormModal />
+          </FormModalProvider>
+        </QueryProvider>
       </body>
     </html>
   );

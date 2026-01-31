@@ -6,13 +6,24 @@ export async function GET() {
   try {
     await connectDB();
     const blogs = await Blog.find({ is_active: true })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // Use lean() for better performance
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Blogs fetched successfully",
       data: blogs,
     });
+    
+    // Add caching headers
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=300, stale-while-revalidate=600'
+    );
+    response.headers.set('CDN-Cache-Control', 'public, s-maxage=600');
+    response.headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=600');
+    
+    return response;
   } catch (error) {
     console.error("Error fetching blogs:", error);
     return NextResponse.json(

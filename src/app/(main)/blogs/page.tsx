@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, Calendar, Tag, FileText, Clock, Image as ImageIcon, User, Eye, MessageCircle, ArrowRight, X, Filter } from 'lucide-react'
+import { Search, Calendar, Tag, FileText, Clock, Image as ImageIcon, User, Eye, MessageCircle, ArrowRight, X, Filter, AlertCircle, RefreshCw } from 'lucide-react'
+import { useBlogs } from '@/hooks/useBlogs'
 
 interface Blog {
   _id: string
@@ -30,32 +31,19 @@ interface Blog {
 }
 
 export default function BlogsPage() {
-  const [blogs, setBlogs] = useState<Blog[]>([])
-  const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('/api/blogs')
-        const result = await response.json()
-        if (result.success) {
-          setBlogs(result.data)
-          setFilteredBlogs(result.data)
-        }
-      } catch (error) {
-        console.error('Error fetching blogs:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchBlogs()
-  }, [])
+  // Use TanStack Query for blogs data
+  const { 
+    data: blogs = [], 
+    isLoading, 
+    error, 
+    refetch 
+  } = useBlogs()
 
-  useEffect(() => {
+  // Filter blogs based on search and category
+  const filteredBlogs = useMemo(() => {
     let filtered = blogs
 
     if (selectedCategory !== 'all') {
@@ -63,24 +51,52 @@ export default function BlogsPage() {
     }
 
     if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
       filtered = filtered.filter(blog => 
-        blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        blog.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        blog.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        blog.title.toLowerCase().includes(searchLower) ||
+        blog.content.toLowerCase().includes(searchLower) ||
+        blog.tags.some(tag => tag.toLowerCase().includes(searchLower))
       )
     }
 
-    setFilteredBlogs(filtered)
+    return filtered
   }, [blogs, searchTerm, selectedCategory])
 
-  const categories = [...new Set(blogs.map(blog => blog.category))]
+  // Extract unique categories
+  const categories = useMemo(() => 
+    [...new Set(blogs.map(blog => blog.category))], 
+    [blogs]
+  )
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-green-100 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading Articles...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Failed to Load Articles</h2>
+          <p className="text-slate-500 mb-6">
+            {error instanceof Error ? error.message : 'An unexpected error occurred'}
+          </p>
+          <Button 
+            onClick={() => refetch()}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
         </div>
       </div>
     )
