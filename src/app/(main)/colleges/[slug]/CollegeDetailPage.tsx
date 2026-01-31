@@ -199,24 +199,24 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative min-h-[500px] bg-slate-50 overflow-hidden py-12 md:py-20">
+      <div className="relative min-h-[400px] sm:min-h-[500px] bg-slate-50 overflow-hidden py-8 sm:py-12 md:py-20">
         {/* Abstract background shapes for "Flow" feel */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-slate-900 skew-x-[-12deg] translate-x-20 hidden lg:block" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
             {/* LEFT SIDE: CONTENT */}
             <div className="order-2 lg:order-1">
-              <div className="flex flex-wrap items-center gap-3 mb-6">
-                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-3 sm:px-4 py-1.5 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
                   <Flag className="w-3 h-3" />
                   {college.country_ref?.name || 'International'}
                 </Badge>
 
                 {college.ranking && (
                   <div className="flex gap-2">
-                    <Badge className="bg-yellow-500 text-white border-none px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg shadow-yellow-200">
+                    <Badge className="bg-yellow-500 text-white border-none px-3 sm:px-4 py-1.5 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 shadow-lg shadow-yellow-200">
                       <Trophy className="w-3 h-3" />
                       Ranked #{typeof college.ranking === 'object' ? college.ranking.country_ranking : college.ranking}
                     </Badge>
@@ -224,18 +224,18 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                 )}
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter mb-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter mb-4 sm:mb-6">
                 {college.name}
                 <span className="text-blue-600">.</span>
               </h1>
 
               {/* Hero Description with Expand/Collapse */}
-              <div className="relative mb-8">
+              <div className="relative mb-6 sm:mb-8">
                 <div
                   className={`relative overflow-hidden transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[200px]' : 'max-h-[80px]'
                     }`}
                 >
-                  <p className="text-lg md:text-xl text-slate-500 font-medium max-w-xl leading-relaxed border-l-4 border-blue-600 pl-6">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-500 font-medium max-w-none sm:max-w-xl leading-relaxed border-l-4 border-blue-600 pl-4 sm:pl-6">
                     {college.overview?.description || college.about_content}
                   </p>
 
@@ -246,7 +246,7 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                 </div>
 
                 {/* More/Less Toggle Button */}
-                <div className="mt-3 pl-6">
+                <div className="mt-3 pl-4 sm:pl-6">
                   <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="group flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest hover:text-blue-700 transition-all"
@@ -268,36 +268,36 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 py-6 border-y border-slate-200">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 py-4 sm:py-6 border-y border-slate-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white shadow-md rounded-xl flex items-center justify-center text-blue-600">
-                    <MapPin className="w-5 h-5" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white shadow-md rounded-xl flex items-center justify-center text-blue-600">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</p>
-                    <p className="text-sm font-bold text-slate-700">{college.country_ref?.name || 'Global'}</p>
+                    <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-700">{college.country_ref?.name || 'Global'}</p>
                   </div>
                 </div>
 
                 {college.establishment_year && (
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white shadow-md rounded-xl flex items-center justify-center text-purple-600">
-                      <Calendar className="w-5 h-5" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white shadow-md rounded-xl flex items-center justify-center text-purple-600">
+                      <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Founded</p>
-                      <p className="text-sm font-bold text-slate-700">{college.establishment_year}</p>
+                      <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Founded</p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-700">{college.establishment_year}</p>
                     </div>
                   </div>
                 )}
 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white shadow-md rounded-xl flex items-center justify-center text-emerald-600">
-                    <Users className="w-5 h-5" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white shadow-md rounded-xl flex items-center justify-center text-emerald-600">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Community</p>
-                    <p className="text-sm font-bold text-slate-700">Intl. Students</p>
+                    <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Community</p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-700">Intl. Students</p>
                   </div>
                 </div>
               </div>
@@ -305,27 +305,27 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
 
             {/* RIGHT SIDE: IMAGE WITH DIRECTIONAL FLOW */}
             <div className="order-1 lg:order-2 relative">
-              <div className="relative z-20 rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[8px] border-white group">
+              <div className="relative z-20 rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] border-[4px] sm:border-[8px] border-white group">
                 <img
                   src={college.banner_url || `https://picsum.photos/seed/${college.slug}/800/1000`}
                   alt={college.name}
-                  className="w-full h-[400px] md:h-[600px] object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-[250px] sm:h-[350px] md:h-[400px] lg:h-[500px] xl:h-[600px] object-cover transition-transform duration-700 group-hover:scale-110"
                 />
 
                 {/* Floating Badge on Image */}
-                <div className="absolute bottom-6 left-6 right-6 p-6 bg-white/90 backdrop-blur-md rounded-[2rem] flex items-center justify-between translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                  <div>
-                    <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Ready to start?</p>
-                    <p className="text-slate-900 font-black">Admissions Open 2026</p>
+                <div className="absolute bottom-3 sm:bottom-4 lg:bottom-6 left-3 sm:left-4 lg:left-6 right-3 sm:right-4 lg:right-6 p-3 sm:p-4 lg:p-6 bg-white/90 backdrop-blur-md rounded-[1rem] sm:rounded-[1.5rem] lg:rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                  <div className="text-center sm:text-left">
+                    <p className="text-[8px] sm:text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Ready to start?</p>
+                    <p className="text-sm sm:text-base lg:text-lg text-slate-900 font-black">Admissions Open 2026</p>
                   </div>
-                  <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white">
-                    <ArrowUpRight className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-slate-900 rounded-xl sm:rounded-2xl flex items-center justify-center text-white">
+                    <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
                 </div>
               </div>
 
               {/* Background Decorative "Arrow" Shape */}
-              <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl -z-10" />
+              <div className="absolute -bottom-6 -right-6 sm:-bottom-8 sm:-right-8 lg:-bottom-10 lg:-right-10 w-32 h-32 sm:w-48 sm:h-48 lg:w-64 lg:h-64 bg-blue-600/10 rounded-full blur-3xl -z-10" />
             </div>
 
           </div>
@@ -334,8 +334,8 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
 
       {/* Navigation Tab Bar */}
       <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 py-3 overflow-x-auto scrollbar-hide">
+        <div className="max-w-none px-0 sm:px-0 md:px-0 lg:px-0">
+          <div className="flex items-center gap-1 py-2 sm:py-3 overflow-x-auto scrollbar-hide scroll-smooth">
             {[
               { name: 'Overview', id: 'overview' },
               { name: 'Key Highlights', id: 'key-highlights' },
@@ -358,13 +358,13 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                     element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-300 whitespace-nowrap group relative overflow-hidden"
+                className="flex items-center gap-2 px-4 sm:px-4 md:px-4 lg:px-6 py-2.5 text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg sm:rounded-xl transition-all duration-300 whitespace-nowrap group relative overflow-hidden flex-shrink-0 min-w-max"
               >
-                <span className="relative z-10">
+                <span className="relative z-10 text-sm">
                   {tab.name}
                 </span>
                 {/* Animated background on hover */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg sm:rounded-xl" />
                 {/* Animated underline on hover */}
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 group-hover:w-3/4 transition-all duration-300 rounded-full" />
               </button>
@@ -374,32 +374,32 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             {/* About Section */}
             <div id="overview">
-              <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
-                <CardHeader className="bg-white px-8 pt-10 pb-2">
+              <Card className="border-none shadow-lg sm:shadow-2xl rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden bg-white">
+                <CardHeader className="bg-white px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-10 pb-2">
                   <div className="flex flex-col gap-2">
-                    <Badge className="w-fit bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
+                    <Badge className="w-fit bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em]">
                       Institution
                     </Badge>
-                    <CardTitle className="text-4xl font-black text-slate-900 flex items-center gap-3 tracking-tighter">
-                      <Info className="w-8 h-8 text-emerald-600 fill-emerald-600/10" />
+                    <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 flex items-center gap-2 sm:gap-3 tracking-tighter">
+                      <Info className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-emerald-600 fill-emerald-600/10" />
                       {college.overview?.title || 'About the Institution'}
                     </CardTitle>
                   </div>
                 </CardHeader>
 
-                <CardContent className="p-8 relative">
+                <CardContent className="p-4 sm:p-6 lg:p-8 relative">
                   {/* Text Container with dynamic height and transition */}
                   <div
                     className={`relative overflow-hidden transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[2000px]' : 'max-h-[160px]'
                       }`}
                   >
-                    <p className="text-slate-500 leading-relaxed text-lg font-medium border-l-4 border-emerald-500 pl-6">
+                    <p className="text-sm sm:text-base lg:text-lg text-slate-500 leading-relaxed font-medium border-l-4 border-emerald-500 pl-4 sm:pl-6">
                       {college.overview?.description || college.about_content}
                     </p>
 
@@ -410,12 +410,12 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                   </div>
 
                   {/* The Interactive Toggle Button */}
-                  <div className="mt-6 flex justify-start pl-6">
+                  <div className="mt-4 sm:mt-6 pl-0">
                     <button
                       onClick={() => setIsExpanded(!isExpanded)}
-                      className="group flex items-center gap-3 text-emerald-600 font-black text-sm uppercase tracking-widest hover:text-emerald-700 transition-all"
+                      className="group w-full flex items-center justify-between px-6 py-4 text-emerald-600 font-black text-xs uppercase tracking-widest hover:text-emerald-700 hover:bg-emerald-50 transition-all rounded-xl border border-emerald-100"
                     >
-                      <span className="relative">
+                      <span className="relative flex items-center gap-3">
                         {isExpanded ? 'Show Less' : 'Show More'}
                         {/* Animated underline */}
                         <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-emerald-500 group-hover:w-full transition-all duration-300" />
@@ -432,9 +432,9 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
                   </div>
 
                   {/* Trust Footer - Subtly indicates data freshness */}
-                  <div className="mt-8 pt-6 border-t border-slate-50 flex items-center gap-2">
+                  <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-50 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                       Updated for 2026 Academic Session
                     </span>
                   </div>
