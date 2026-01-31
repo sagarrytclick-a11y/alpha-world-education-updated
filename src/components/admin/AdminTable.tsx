@@ -14,7 +14,7 @@ import { Pencil, Trash2, Eye } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface Column<T> {
-  key: keyof T
+  key: string
   title: string
   render?: (value: any, record: T, index: number) => ReactNode
   width?: string
@@ -93,11 +93,51 @@ export function AdminTable<T = Record<string, unknown>>({
             <TableRow key={index}>
               {columns.map((column) => (
                 <TableCell key={String(column.key)}>
-                  {column.render 
-                    ? column.render(record[column.key], record, index)
-                    : String(record[column.key] ?? '')
-                  }
-                </TableCell>
+  {(() => {
+    try {
+      const value = (record as any)[column.key];
+
+      // 1. If a custom render function is provided, use it
+      if (column.render) {
+        const rendered = column.render(value, record, index);
+        // Safety: If the render function accidentally returns an object, stringify it
+        return typeof rendered === 'object' && rendered !== null && !Array.isArray(rendered) && !(rendered as any).$$typeof
+          ? JSON.stringify(rendered)
+          : rendered;
+      }
+
+      // 2. Handle null or undefined
+      if (value === undefined || value === null) {
+        return <span className="text-gray-400">N/A</span>;
+      }
+
+      // 3. Handle Dates
+      if (value instanceof Date) {
+        return value.toLocaleDateString();
+      }
+
+      // 4. Handle Objects (The culprit)
+      if (typeof value === 'object') {
+        // If it's a specific object like your University data, 
+        // we extract the most useful string (title or name)
+        const displayValue = value.title || value.name || value.label;
+        
+        if (displayValue && typeof displayValue === 'string') {
+          return displayValue;
+        }
+
+        // Fallback: Just stringify the whole thing so it doesn't crash
+        return <span className="text-xs text-gray-400 font-mono">{JSON.stringify(value)}</span>;
+      }
+
+      // 5. Default for strings, numbers, booleans
+      return String(value);
+    } catch (error) {
+      console.error('Error rendering table cell:', error);
+      return <span className="text-destructive">Render Error</span>;
+    }
+  })()}
+</TableCell>
               ))}
               {actions && actions.length > 0 && (
                 <TableCell>

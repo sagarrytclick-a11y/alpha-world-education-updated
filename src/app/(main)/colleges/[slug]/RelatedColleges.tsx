@@ -22,15 +22,32 @@ interface College {
   slug: string
   country_ref: any
   exams: string[]
-  fees: number
-  duration: string
+  fees?: number
+  duration?: string
   establishment_year?: string
-  ranking?: string
+  ranking?: string | {
+    title: string
+    description: string
+    country_ranking: string
+    world_ranking: string
+    accreditation: string[]
+  }
   banner_url?: string
-  about_content: string
+  about_content?: string
   is_active: boolean
   createdAt: string
   updatedAt: string
+  
+  // Comprehensive structure fields
+  overview?: {
+    title: string
+    description: string
+  }
+  fees_structure?: {
+    title: string
+    description: string
+    courses: { course_name: string; duration: string; annual_tuition_fee: string }[]
+  }
 }
 
 interface RelatedCollegesProps {
@@ -117,36 +134,34 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
         return (
           <div key={college._id} className="group">
             <div className="relative overflow-hidden rounded-t-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 bg-white">
-              <div className="h-56">
-                {college.banner_url ? (
-                  <img
-                    src={college.banner_url}
-                    alt={college.name}
-                    className="w-full h-full object-cover "
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
-                    <GraduationCap className="w-16 h-16 text-green-600" />
+              <div className="relative h-48 w-full overflow-hidden rounded-t-[2rem]">
+                <img
+                  src={college.banner_url || `https://picsum.photos/seed/${college.slug}/400/300`}
+                  alt={college.name}
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Ranking Badge */}
+                {college.ranking && (
+                  <div className="absolute top-4 right-4">
+                    {typeof college.ranking === 'object' ? (
+                      <Badge className="bg-yellow-500 text-white border-none px-3 py-1 rounded-full text-xs font-black">
+                        #{college.ranking.country_ranking || college.ranking.world_ranking}
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-yellow-500 text-white border-none px-3 py-1 rounded-full text-xs font-black">
+                        #{college.ranking}
+                      </Badge>
+                    )}
                   </div>
                 )}
-              </div>
-
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
-              
-              <div className="absolute top-4 left-4">
-                <Badge className="bg-white/90 backdrop-blur-md text-green-700 hover:bg-white border-none px-4 py-2 rounded-full text-xs font-black uppercase tracking-tighter shadow-sm">
-                  {countryFlag} {countryName}
-                </Badge>
-              </div>
-
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex items-center gap-3 text-white">
-                  {/* <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <GraduationCap size={20} />
-                  </div>
-                  <h3 className="font-bold text-lg line-clamp-1 leading-tight group-hover:text-green-400 transition-colors">
-                    {college.name}
-                  </h3> */}
+                
+                {/* Country Badge */}
+                <div className="absolute top-4 left-4">
+                  <Badge className="bg-white/90 backdrop-blur-sm text-slate-900 border-none px-3 py-1 rounded-full text-xs font-black">
+                    {getCountryName(college.country_ref)}
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -160,14 +175,21 @@ export default function RelatedColleges({ currentCollegeSlug }: RelatedCollegesP
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Yearly Fees</span>
                   <div className="flex items-center text-green-600 font-black text-lg">
                     <DollarSign size={16} />
-                    <span>{college.fees.toLocaleString()}</span>
+                    <span>
+                      {college.fees 
+                        ? `$${college.fees.toLocaleString()}`
+                        : college.fees_structure?.courses?.[0]?.annual_tuition_fee || 'N/A'
+                      }
+                    </span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duration</span>
                   <div className="flex items-center text-slate-700 font-black text-lg">
                     <Clock size={16} className="mr-1 text-slate-400" />
-                    <span>{college.duration} years</span>
+                    <span>
+                      {college.duration || college.fees_structure?.courses?.[0]?.duration || 'N/A'} years
+                    </span>
                   </div>
                 </div>
               </div>

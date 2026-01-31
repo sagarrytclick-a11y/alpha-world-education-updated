@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { AdminTable, createEditAction, createDeleteAction } from '@/components/admin/AdminTable'
 import { AdminModal } from '@/components/admin/AdminModal'
-import { AdminForm } from '@/components/admin/AdminForm'
+import { ComprehensiveCollegeForm } from '@/components/admin/ComprehensiveCollegeForm'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -31,15 +31,64 @@ export interface College {
   slug: string
   country_ref: AdminCountry | string
   exams: string[]
-  fees: number
-  duration: string
+  fees?: number
+  duration?: string
   establishment_year?: string
-  ranking?: string
-  banner_url: string
-  about_content: string
+  ranking?: string | {
+    title: string
+    description: string
+    country_ranking: string
+    world_ranking: string
+    accreditation: string[]
+  }
+  banner_url?: string
+  about_content?: string
   is_active: boolean
   createdAt: string
   updatedAt: string
+  
+  // Comprehensive structure fields
+  overview?: {
+    title: string
+    description: string
+  }
+  key_highlights?: {
+    title: string
+    description: string
+    features: string[]
+  }
+  why_choose_us?: {
+    title: string
+    description: string
+    features: { title: string; description: string }[]
+  }
+  ranking_section?: {
+    title: string
+    description: string
+    country_ranking: string
+    world_ranking: string
+    accreditation: string[]
+  }
+  admission_process?: {
+    title: string
+    description: string
+    steps: string[]
+  }
+  documents_required?: {
+    title: string
+    description: string
+    documents: string[]
+  }
+  fees_structure?: {
+    title: string
+    description: string
+    courses: { course_name: string; duration: string; annual_tuition_fee: string }[]
+  }
+  campus_highlights?: {
+    title: string
+    description: string
+    highlights: string[]
+  }
 }
 
 export default function CollegesPage() {
@@ -55,17 +104,54 @@ export default function CollegesPage() {
   const [selectedCountry, setSelectedCountry] = useState<string>('all')
   
   const [formData, setFormData] = useState({
+    // Basic Info
     name: '',
     slug: '',
-    country: '',
+    country_ref: '',
     exams: [] as string[],
-    fees: '',
-    duration: '',
-    establishment_year: '',
-    ranking: '',
     banner_url: '',
-    about: '',
-    is_active: true
+    is_active: true,
+
+    // Overview
+    overview_title: 'Overview',
+    overview_description: '',
+
+    // Key Highlights
+    key_highlights_title: 'Key Highlights',
+    key_highlights_description: '',
+    key_highlights_features: [] as string[],
+
+    // Why Choose Us
+    why_choose_us_title: 'Why Choose Us',
+    why_choose_us_description: '',
+    why_choose_us_features: [] as { title: string; description: string }[],
+
+    // Ranking & Recognition
+    ranking_title: 'Ranking & Recognition',
+    ranking_description: '',
+    country_ranking: '',
+    world_ranking: '',
+    accreditation: [] as string[],
+
+    // Admission Process
+    admission_process_title: 'Admission Process',
+    admission_process_description: '',
+    admission_process_steps: [] as string[],
+
+    // Documents Required
+    documents_required_title: 'Documents Required',
+    documents_required_description: '',
+    documents_required_documents: [] as string[],
+
+    // Fees Structure
+    fees_structure_title: 'Fees Structure',
+    fees_structure_description: '',
+    fees_structure_courses: [] as { course_name: string; duration: string; annual_tuition_fee: string }[],
+
+    // Campus Highlights
+    campus_highlights_title: 'Campus Highlights',
+    campus_highlights_description: '',
+    campus_highlights_highlights: [] as string[],
   })
   const [countries, setCountries] = useState(dummyCountries)
 
@@ -134,7 +220,7 @@ export default function CollegesPage() {
 
   const columns = [
     {
-      key: 'name' as keyof College,
+      key: 'name',
       title: 'College Name',
       render: (value: string, record: College) => {
         const countryName = !record.country_ref 
@@ -152,16 +238,16 @@ export default function CollegesPage() {
       }
     },
     {
-      key: 'exams' as keyof College,
+      key: 'exams',
       title: 'Exams',
       render: (value: string[]) => (
         <div className="flex flex-wrap gap-1">
-          {value.slice(0, 2).map((exam, index) => (
+          {value?.slice(0, 2).map((exam, index) => (
             <Badge key={index} variant="outline" className="text-xs">
               {exam}
             </Badge>
           ))}
-          {value.length > 2 && (
+          {value?.length > 2 && (
             <Badge variant="outline" className="text-xs">
               +{value.length - 2}
             </Badge>
@@ -170,30 +256,83 @@ export default function CollegesPage() {
       )
     },
     {
-      key: 'fees' as keyof College,
+      key: 'fees',
       title: 'Fees',
-      render: (value: number) => (
-        <div className="font-medium">
-          ${value.toLocaleString()}/year
-        </div>
-      )
+      render: (value: number, record: College) => {
+        if (record.fees_structure && record.fees_structure.courses.length > 0) {
+          return record.fees_structure.courses[0].annual_tuition_fee || 'N/A'
+        }
+        return value ? `$${value.toLocaleString()}/year` : 'N/A'
+      }
     },
     {
-      key: 'duration' as keyof College,
-      title: 'Duration'
+      key: 'duration',
+      title: 'Duration',
+      render: (value: string, record: College) => {
+        if (record.fees_structure && record.fees_structure.courses.length > 0) {
+          return record.fees_structure.courses[0].duration || 'N/A'
+        }
+        return value || 'N/A'
+      }
     },
     {
-      key: 'establishment_year' as keyof College,
+      key: 'banner_url',
+      title: 'Banner',
+      render: (value: string) => {
+        if (!value) return 'N/A'
+        return (
+          <a 
+            href={value} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 text-sm underline"
+          >
+            View Banner
+          </a>
+        )
+      }
+    },
+    {
+      key: 'establishment_year',
       title: 'Est. Year',
       render: (value: string) => value || '-'
     },
     {
-      key: 'ranking' as keyof College,
+      key: 'ranking',
       title: 'Ranking',
-      render: (value: string) => value || '-'
+      render: (value: string) => {
+        if (!value) return '-'
+        
+        try {
+          const rankingData = typeof value === 'string' ? JSON.parse(value) : value
+          
+          return (
+            <div className="space-y-1">
+              {rankingData.country_ranking && (
+                <div className="text-sm">
+                  <span className="text-gray-500">Country:</span> #{rankingData.country_ranking}
+                </div>
+              )}
+              {rankingData.world_ranking && (
+                <div className="text-sm">
+                  <span className="text-gray-500">World:</span> #{rankingData.world_ranking}
+                </div>
+              )}
+              {rankingData.accreditation && rankingData.accreditation.length > 0 && (
+                <div className="text-xs text-gray-400">
+                  {rankingData.accreditation.length} accreditation(s)
+                </div>
+              )}
+            </div>
+          )
+        } catch (error) {
+          console.error('Error parsing ranking data:', error)
+          return <span className="text-xs text-gray-400">Invalid data</span>
+        }
+      }
     },
     {
-      key: 'is_active' as keyof College,
+      key: 'is_active',
       title: 'Status',
       render: (value: boolean) => (
         <Badge variant={value ? 'default' : 'secondary'}>
@@ -202,7 +341,7 @@ export default function CollegesPage() {
       )
     },
     {
-      key: 'createdAt' as keyof College,
+      key: 'createdAt',
       title: 'Created',
       render: (value: string) => {
         const date = new Date(value)
@@ -213,23 +352,87 @@ export default function CollegesPage() {
 
   const actions = [
     createEditAction((college: College) => {
+      console.log('🔍 DEBUG: Loading college for edit:', college)
+      console.log('🔍 DEBUG: college.ranking type:', typeof college.ranking)
+      console.log('🔍 DEBUG: college.ranking value:', college.ranking)
+      
       setEditingCollege(college)
+      
+      // Properly extract all existing data when editing
+      const extractedRanking = typeof college.ranking === 'object' && college.ranking !== null 
+        ? college.ranking 
+        : {
+            title: 'Ranking & Recognition',
+            description: '',
+            country_ranking: college.ranking || '',
+            world_ranking: '',
+            accreditation: []
+          }
+      
+      const extractedFeesStructure = college.fees_structure || {
+        title: "Fees Structure",
+        description: "",
+        courses: college.fees ? [{
+          course_name: "Program",
+          duration: college.duration || "N/A",
+          annual_tuition_fee: `$${college.fees.toLocaleString()}`
+        }] : []
+      }
+      
+      // Initialize form with ALL existing college data
       setFormData({
-        name: college.name,
-        slug: college.slug,
-        country: !college.country_ref 
+        // Basic Info
+        name: college.name || '',
+        slug: college.slug || '',
+        country_ref: !college.country_ref 
           ? ''
           : typeof college.country_ref === 'string' 
             ? college.country_ref 
             : college.country_ref.slug || '',
-        exams: college.exams,
-        fees: college.fees.toString(),
-        duration: college.duration,
-        establishment_year: college.establishment_year || '',
-        ranking: college.ranking || '',
+        exams: college.exams || [],
         banner_url: college.banner_url || '',
-        about: college.about_content,
-        is_active: college.is_active
+        is_active: college.is_active ?? true,
+
+        // Overview - load existing data
+        overview_title: college.overview?.title || 'Overview',
+        overview_description: college.overview?.description || college.about_content || '',
+
+        // Key Highlights - load existing data
+        key_highlights_title: college.key_highlights?.title || 'Key Highlights',
+        key_highlights_description: college.key_highlights?.description || '',
+        key_highlights_features: college.key_highlights?.features || [],
+
+        // Why Choose Us - load existing data
+        why_choose_us_title: college.why_choose_us?.title || 'Why Choose Us',
+        why_choose_us_description: college.why_choose_us?.description || '',
+        why_choose_us_features: college.why_choose_us?.features || [],
+
+        // Ranking & Recognition - load existing data
+        ranking_title: extractedRanking.title || 'Ranking & Recognition',
+        ranking_description: extractedRanking.description || '',
+        country_ranking: extractedRanking.country_ranking || '',
+        world_ranking: extractedRanking.world_ranking || '',
+        accreditation: extractedRanking.accreditation || [],
+
+        // Admission Process - load existing data
+        admission_process_title: college.admission_process?.title || 'Admission Process',
+        admission_process_description: college.admission_process?.description || '',
+        admission_process_steps: college.admission_process?.steps || [],
+
+        // Documents Required - load existing data
+        documents_required_title: college.documents_required?.title || 'Documents Required',
+        documents_required_description: college.documents_required?.description || '',
+        documents_required_documents: college.documents_required?.documents || [],
+
+        // Fees Structure - load existing data
+        fees_structure_title: extractedFeesStructure.title || 'Fees Structure',
+        fees_structure_description: extractedFeesStructure.description || '',
+        fees_structure_courses: extractedFeesStructure.courses || [],
+
+        // Campus Highlights - load existing data
+        campus_highlights_title: college.campus_highlights?.title || 'Campus Highlights',
+        campus_highlights_description: college.campus_highlights?.description || '',
+        campus_highlights_highlights: college.campus_highlights?.highlights || [],
       })
       setIsModalOpen(true)
     }),
@@ -239,97 +442,57 @@ export default function CollegesPage() {
     })
   ]
 
-  const formFields = [
-    {
-      name: 'name',
-      label: 'College Name',
-      type: 'text' as const,
-      placeholder: 'Enter college name',
-      required: true
-    },
-    {
-      name: 'slug',
-      label: 'Slug',
-      type: 'text' as const,
-      placeholder: 'college-slug',
-      required: true
-    },
-    {
-      name: 'country',
-      label: 'Country',
-      type: 'select' as const,
-      options: [
-        { value: 'select-country', label: 'Select a country' },
-        ...countries.map(country => ({
-          value: country.slug,
-          label: country.name
-        }))
-      ],
-      required: true
-    },
-    {
-      name: 'exams',
-      label: 'Required Exams',
-      type: 'tags' as const,
-      placeholder: 'Add exam requirements',
-      description: 'Add exams like SAT, TOEFL, IELTS, etc.'
-    },
-    {
-      name: 'fees',
-      label: 'Annual Fees (USD)',
-      type: 'number' as const,
-      placeholder: '50000',
-      required: true
-    },
-    {
-      name: 'duration',
-      label: 'Duration',
-      type: 'text' as const,
-      placeholder: '4 years',
-      required: true
-    },
-    {
-      name: 'establishment_year',
-      label: 'Establishment Year',
-      type: 'text' as const,
-      placeholder: 'e.g., 1850, 1995'
-    },
-    {
-      name: 'ranking',
-      label: 'College Ranking',
-      type: 'text' as const,
-      placeholder: 'e.g., 150th nationally, 500th globally'
-    },
-    {
-      name: 'banner_url',
-      label: 'Cover Image URL',
-      type: 'text' as const,
-      placeholder: 'https://example.com/cover-image.jpg',
-      description: 'Enter college cover image URL'
-    },
-    {
-      name: 'about',
-      label: 'About College',
-      type: 'textarea' as const,
-      placeholder: 'Enter college description',
-      required: true
-    },
-  ]
-
   const handleAddCollege = () => {
     setEditingCollege(null)
     setFormData({
+      // Basic Info
       name: '',
       slug: '',
-      country: '',
-      exams: [],
-      fees: '',
-      duration: '',
-      establishment_year: '',
-      ranking: '',
+      country_ref: '',
+      exams: [] as string[],
       banner_url: '',
-      about: '',
-      is_active: true
+      is_active: true,
+
+      // Overview
+      overview_title: 'Overview',
+      overview_description: '',
+
+      // Key Highlights
+      key_highlights_title: 'Key Highlights',
+      key_highlights_description: '',
+      key_highlights_features: [] as string[],
+
+      // Why Choose Us
+      why_choose_us_title: 'Why Choose Us',
+      why_choose_us_description: '',
+      why_choose_us_features: [] as { title: string; description: string }[],
+
+      // Ranking & Recognition
+      ranking_title: 'Ranking & Recognition',
+      ranking_description: '',
+      country_ranking: '',
+      world_ranking: '',
+      accreditation: [] as string[],
+
+      // Admission Process
+      admission_process_title: 'Admission Process',
+      admission_process_description: '',
+      admission_process_steps: [] as string[],
+
+      // Documents Required
+      documents_required_title: 'Documents Required',
+      documents_required_description: '',
+      documents_required_documents: [] as string[],
+
+      // Fees Structure
+      fees_structure_title: 'Fees Structure',
+      fees_structure_description: '',
+      fees_structure_courses: [] as { course_name: string; duration: string; annual_tuition_fee: string }[],
+
+      // Campus Highlights
+      campus_highlights_title: 'Campus Highlights',
+      campus_highlights_description: '',
+      campus_highlights_highlights: [] as string[],
     })
     setIsModalOpen(true)
   }
@@ -340,19 +503,62 @@ export default function CollegesPage() {
     try {
       console.log('🚀 Starting college save process...')
       console.log('📝 Form data:', formData)
-      console.log('🔍 Required fields check:')
-      console.log('- name:', formData.name)
-      console.log('- slug:', formData.slug)
-      console.log('- country:', formData.country)
-      console.log('- fees:', formData.fees)
-      console.log('- duration:', formData.duration)
-      console.log('- about:', formData.about)
-      console.log('- exams:', formData.exams)
-      console.log('🌍 Available countries:', countries.map(c => ({ name: c.name, slug: c.slug })))
       
-      // Validate country selection
-      if (formData.country === 'select-country' || !formData.country) {
-        alert('Please select a valid country')
+      // Comprehensive validation
+      const validationErrors: string[] = []
+      
+      // Basic Info Validation
+      if (!formData.name?.trim()) validationErrors.push('College name is required')
+      if (!formData.slug?.trim()) validationErrors.push('College slug is required')
+      if (!formData.country_ref || formData.country_ref === 'select-country') validationErrors.push('Please select a valid country')
+      
+      // Overview Validation
+      if (!formData.overview_description?.trim()) validationErrors.push('Overview description is required')
+      
+      // Key Highlights Validation
+      if (!formData.key_highlights_description?.trim()) validationErrors.push('Key highlights description is required')
+      if (!formData.key_highlights_features?.length) validationErrors.push('At least one key highlight feature is required')
+      
+      // Why Choose Us Validation
+      if (!formData.why_choose_us_description?.trim()) validationErrors.push('Why choose us description is required')
+      if (!formData.why_choose_us_features?.length) validationErrors.push('At least one why choose us feature is required')
+      
+      // Ranking Validation
+      if (!formData.ranking_description?.trim()) validationErrors.push('Ranking description is required')
+      if (!formData.country_ranking?.trim() && !formData.world_ranking?.trim()) {
+        validationErrors.push('At least country ranking or world ranking is required')
+      }
+      
+      // Admission Process Validation
+      if (!formData.admission_process_description?.trim()) validationErrors.push('Admission process description is required')
+      if (!formData.admission_process_steps?.length) validationErrors.push('At least one admission step is required')
+      
+      // Documents Required Validation
+      if (!formData.documents_required_description?.trim()) validationErrors.push('Documents required description is required')
+      if (!formData.documents_required_documents?.length) validationErrors.push('At least one required document is needed')
+      
+      // Fees Structure Validation
+      if (!formData.fees_structure_description?.trim()) validationErrors.push('Fees structure description is required')
+      if (!formData.fees_structure_courses?.length) validationErrors.push('At least one course with fees is required')
+      
+      // Campus Highlights Validation
+      if (!formData.campus_highlights_description?.trim()) validationErrors.push('Campus highlights description is required')
+      if (!formData.campus_highlights_highlights?.length) validationErrors.push('At least one campus highlight is required')
+      
+      // Exams Validation
+      if (!formData.exams?.length) validationErrors.push('At least one required exam is needed')
+      
+      // Banner URL Validation (optional but if provided, should be valid)
+      if (formData.banner_url?.trim()) {
+        try {
+          new URL(formData.banner_url)
+        } catch {
+          validationErrors.push('Banner URL must be a valid URL')
+        }
+      }
+      
+      if (validationErrors.length > 0) {
+        alert(`Please complete the following required fields:\n\n${validationErrors.map((error, index) => `${index + 1}. ${error}`).join('\n')}`)
         setLoading(false)
         return
       }
@@ -369,18 +575,75 @@ export default function CollegesPage() {
       const payload = {
         name: formData.name,
         slug: formData.slug,
-        country_ref: formData.country,
+        country_ref: formData.country_ref,
         exams: formData.exams,
-        fees: parseInt(formData.fees),
-        duration: formData.duration,
-        establishment_year: formData.establishment_year,
-        ranking: formData.ranking,
         banner_url: formData.banner_url,
-        about_content: formData.about,
-        is_active: formData.is_active
+        is_active: formData.is_active,
+
+        // Comprehensive structure
+        overview: {
+          title: formData.overview_title,
+          description: formData.overview_description
+        },
+        key_highlights: {
+          title: formData.key_highlights_title,
+          description: formData.key_highlights_description,
+          features: formData.key_highlights_features
+        },
+        why_choose_us: {
+          title: formData.why_choose_us_title,
+          description: formData.why_choose_us_description,
+          features: formData.why_choose_us_features
+        },
+        ranking: {
+          title: formData.ranking_title,
+          description: formData.ranking_description,
+          country_ranking: formData.country_ranking,
+          world_ranking: formData.world_ranking,
+          accreditation: formData.accreditation
+        },
+        
+        // Debug ranking data
+        ranking_debug: {
+          country_ranking_type: typeof formData.country_ranking,
+          country_ranking_value: formData.country_ranking,
+          world_ranking_type: typeof formData.world_ranking,
+          world_ranking_value: formData.world_ranking,
+          accreditation_type: typeof formData.accreditation,
+          accreditation_value: formData.accreditation
+        },
+        admission_process: {
+          title: formData.admission_process_title,
+          description: formData.admission_process_description,
+          steps: formData.admission_process_steps
+        },
+        documents_required: {
+          title: formData.documents_required_title,
+          description: formData.documents_required_description,
+          documents: formData.documents_required_documents
+        },
+        fees_structure: {
+          title: formData.fees_structure_title,
+          description: formData.fees_structure_description,
+          courses: formData.fees_structure_courses
+        },
+        campus_highlights: {
+          title: formData.campus_highlights_title,
+          description: formData.campus_highlights_description,
+          highlights: formData.campus_highlights_highlights
+        },
+
+        // Legacy fields for backward compatibility
+        about_content: formData.overview_description,
       }
       
       console.log('📦 Request payload:', payload)
+      console.log('🔍 DEBUG: Ranking object being sent:', payload.ranking)
+      console.log('🔍 DEBUG: Ranking field types:', {
+        country_ranking: typeof payload.ranking.country_ranking,
+        world_ranking: typeof payload.ranking.world_ranking,
+        accreditation: typeof payload.ranking.accreditation
+      })
       
       const response = await fetch(url, {
         method,
@@ -515,10 +778,13 @@ export default function CollegesPage() {
           loading={loading}
           size="xl"
         >
-          <AdminForm
-            fields={formFields}
+          <ComprehensiveCollegeForm
             data={formData}
-            onChange={(field, value) => {
+            countries={countries.map((c, index) => ({ 
+              ...c, 
+              _id: c.id || `country-${index}` 
+            }))}
+            onChange={(field: string, value: any) => {
               setFormData(prev => ({ 
                 ...prev, 
                 [field]: value,
