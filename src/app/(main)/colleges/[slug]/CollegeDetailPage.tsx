@@ -132,7 +132,12 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isExpanded, setIsExpanded] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { openModal } = useFormModal()
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { phones, emails } = useContactInfo();
 
@@ -232,40 +237,42 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
               {/* Hero Description with Expand/Collapse */}
               <div className="relative mb-6 sm:mb-8">
                 <div
-                  className={`relative overflow-hidden transition-all duration-700 ease-in-out ${isExpanded ? 'max-h-[200px]' : 'max-h-[80px]'
+                  className={`relative overflow-hidden ${mounted ? 'transition-all duration-700 ease-in-out' : ''} ${mounted && isExpanded ? 'max-h-[200px]' : mounted ? 'max-h-[80px]' : 'max-h-none'
                     }`}
                 >
                   <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-500 font-medium max-w-none sm:max-w-xl leading-relaxed border-l-4 border-blue-600 pl-4 sm:pl-6">
                     {college.overview?.description || college.about_content}
                   </p>
 
-                  {/* Gradient Overlay - Only visible when collapsed */}
-                  {!isExpanded && (
+                  {/* Gradient Overlay - Only visible when collapsed and mounted */}
+                  {mounted && !isExpanded && (
                     <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-slate-50 via-slate-50/80 to-transparent z-10" />
                   )}
                 </div>
 
-                {/* More/Less Toggle Button */}
-                <div className="mt-3 pl-4 sm:pl-6">
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="group flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest hover:text-blue-700 transition-all"
-                  >
-                    <span className="relative">
-                      {isExpanded ? 'Show Less' : 'Show More'}
-                      {/* Animated underline */}
-                      <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 group-hover:w-full transition-all duration-300" />
-                    </span>
+                {/* More/Less Toggle Button - Only show after mount */}
+                {mounted && (
+                  <div className="mt-3 pl-4 sm:pl-6">
+                    <button
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="group flex items-center gap-2 text-blue-600 font-black text-xs uppercase tracking-widest hover:text-blue-700 transition-all"
+                    >
+                      <span className="relative">
+                        {isExpanded ? 'Show Less' : 'Show More'}
+                        {/* Animated underline */}
+                        <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-blue-500 group-hover:w-full transition-all duration-300" />
+                      </span>
 
-                    <div className={`w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
-                      {isExpanded ? (
-                        <ChevronUp className="w-3 h-3" />
-                      ) : (
-                        <ArrowRight className="w-3 h-3" />
-                      )}
-                    </div>
-                  </button>
-                </div>
+                      <div className={`w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
+                        {isExpanded ? (
+                          <ChevronUp className="w-3 h-3" />
+                        ) : (
+                          <ArrowRight className="w-3 h-3" />
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-4 sm:gap-6 py-4 sm:py-6 border-y border-slate-200">
@@ -341,7 +348,7 @@ const CollegeDetailPage: React.FC<CollegeDetailPageProps> = ({ slug }) => {
               { name: 'Key Highlights', id: 'key-highlights' },
               { name: 'Why Choose ?', id: 'why-choose' },
               { name: 'Ranking', id: 'ranking' },
-              { name: 'Course Highlights', id: 'fees-structure' },
+              { name: 'Course Highlights', id: 'course-highlights' },
               { name: 'Admission Process', id: 'admission-process' },
               { name: 'Eligibility', id: 'entrance-exams' },
               { name: 'Documents', id: 'documents-required' },
