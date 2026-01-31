@@ -172,7 +172,7 @@ const ExamPage = () => {
           <h3 className="text-xl font-bold text-slate-900">Exam not found</h3>
           <p className="text-slate-500 font-medium">The exam you're looking for doesn't exist.</p>
           <Link href="/exams">
-            <Button className="mt-4 bg-green-600 hover:bg-green-700">
+            <Button className="mt-4 bg-green-600 text-black hover:bg-green-700">
               Back to Exams
             </Button>
           </Link>
@@ -223,19 +223,89 @@ const ExamPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
-      {/* Hero Section - Image Only */}
+      {/* Hero Section - Enhanced Image Design */}
       {exam.hero_section && (
-        <div className="relative bg-gradient-to-br from-green-600 to-emerald-700 text-white overflow-hidden h-96">
-          <div className="absolute inset-0 bg-black/20" />
-          {exam.hero_section.image && (
-            <div className="absolute inset-0">
-              <img 
-                src={exam.hero_section.image} 
-                alt={exam.name}
-                className="w-full h-full object-cover"
-              />
+        <div className="relative bg-gradient-to-br from-green-600 to-emerald-700 overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-20" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }} />
+          
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Left Content */}
+              <div className="text-white">
+                <div className="flex flex-wrap gap-3 mb-6">
+                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">
+                    {exam.exam_type}
+                  </Badge>
+                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">
+                    {exam.exam_mode}
+                  </Badge>
+                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">
+                    {exam.frequency}
+                  </Badge>
+                </div>
+                
+                <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-tight">
+                  {exam.hero_section?.title || exam.name}
+                </h1>
+                
+                {exam.hero_section?.subtitle && (
+                  <p className="text-xl text-white/90 mb-8 max-w-2xl leading-relaxed font-medium">
+                    {exam.hero_section.subtitle}
+                  </p>
+                )}
+                
+                <div className="flex flex-wrap gap-4">
+                  <Button 
+                    onClick={openModal}
+                    className="bg-white text-green-700 hover:bg-green-50 font-black rounded-2xl h-14 px-8 text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
+                  >
+                    Get Expert Guidance
+                  </Button>
+                  <Link href="/exams">
+                    <Button 
+                      variant="outline"
+                      className="border-white/30 text-black hover:bg-white/10 font-black rounded-2xl h-14 px-8 text-lg backdrop-blur-sm"
+                    >
+                      <ArrowLeft className="w-4 h-4 text-black mr-2" />
+                      Back to Exams
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
+              {/* Right Image */}
+              <div className="relative">
+                {exam.hero_section.image ? (
+                  <div className="relative group">
+                    <div className="absolute -inset-4 bg-white/10 backdrop-blur-sm rounded-3xl group-hover:scale-105 transition-transform duration-500" />
+                    <div className="relative bg-white rounded-3xl overflow-hidden shadow-2xl">
+                      <img 
+                        src={exam.hero_section.image} 
+                        alt={exam.name}
+                        className="w-full h-80 lg:h-96 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative group">
+                    <div className="absolute -inset-4 bg-white/10 backdrop-blur-sm rounded-3xl group-hover:scale-105 transition-transform duration-500" />
+                    <div className="relative bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden shadow-2xl border border-white/20">
+                      <div className="w-full h-80 lg:h-96 flex items-center justify-center">
+                        <div className="text-center text-white">
+                          <FileText className="w-24 h-24 mx-auto mb-4 opacity-50" />
+                          <p className="text-lg font-medium opacity-70">Exam Image</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -276,48 +346,6 @@ const ExamPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Content - Moved Below Tabs */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-3 mb-6">
-            <Badge className="bg-green-100 text-green-800 border-green-200 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
-              {exam.exam_type}
-            </Badge>
-            <Badge className="bg-blue-100 text-blue-800 border-blue-200 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
-              {exam.exam_mode}
-            </Badge>
-            <Badge className="bg-purple-100 text-purple-800 border-purple-200 px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest">
-              {exam.frequency}
-            </Badge>
-          </div>
-          
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight text-slate-900">
-            {exam.hero_section?.title || exam.name}
-          </h1>
-          
-          {exam.hero_section?.subtitle && (
-            <p className="text-xl text-slate-600 mb-8 max-w-3xl leading-relaxed font-medium">
-              {exam.hero_section.subtitle}
-            </p>
-          )}
-          
-          <div className="flex flex-wrap gap-4">
-            <Button 
-              onClick={openModal}
-              className="bg-green-600 text-white hover:bg-green-700 font-black rounded-2xl h-14 px-8 text-lg"
-            >
-              Get Expert Guidance
-            </Button>
-            <Link href="/exams">
-              <Button 
-                variant="outline"
-                className="border-slate-300 text-slate-700 hover:bg-slate-50 font-black rounded-2xl h-14 px-8 text-lg"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Exams
-              </Button>
-            </Link>
-          </div>
-        </div>
         <div className="grid grid-cols-1 gap-8">
           {/* Main Content */}
           <div className="col-span-1 space-y-8">
@@ -364,39 +392,66 @@ const ExamPage = () => {
             {/* Registration Section */}
             {exam.registration && (
               <div id="registration" className="scroll-mt-24">
-                <Card className="border-none shadow-lg rounded-2xl mb-8">
+                <Card className="border-none shadow-lg rounded-2xl mb-8 overflow-hidden">
                   <CardContent className="p-0">
-                    {/* Registration Header with Image */}
-                    <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white overflow-hidden rounded-t-2xl">
-                      {exam.registration.image && (
-                        <div className="absolute inset-0">
-                          <img 
-                            src={exam.registration.image} 
-                            alt={exam.registration.title}
-                            className="w-full h-full object-cover opacity-20"
-                          />
-                        </div>
-                      )}
-                      <div className="relative p-8">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                            <Users className="w-6 h-6 text-white" />
+                    {/* Registration Header with Enhanced Image */}
+                    <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white overflow-hidden">
+                      {/* Background Pattern */}
+                      <div className="absolute inset-0 opacity-30" style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                      }} />
+                      
+                      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+                        {/* Left Content */}
+                        <div className="flex flex-col justify-center">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                              <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-black">{exam.registration.title}</h2>
                           </div>
-                          <h2 className="text-2xl font-black">{exam.registration.title}</h2>
+                          <p className="text-white/90 leading-relaxed font-medium">
+                            {exam.registration.description}
+                          </p>
+                        </div>
+                        
+                        {/* Right Image */}
+                        <div className="relative">
+                          {exam.registration.image ? (
+                            <div className="relative group">
+                              <div className="absolute -inset-3 bg-white/10 backdrop-blur-sm rounded-2xl group-hover:scale-105 transition-transform duration-500" />
+                              <div className="relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl border border-white/20">
+                                <img 
+                                  src={exam.registration.image} 
+                                  alt={exam.registration.title}
+                                  className="w-full h-48 lg:h-56 object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="relative group">
+                              <div className="absolute -inset-3 bg-white/10 backdrop-blur-sm rounded-2xl group-hover:scale-105 transition-transform duration-500" />
+                              <div className="relative bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl border border-white/20">
+                                <div className="w-full h-48 lg:h-56 flex items-center justify-center">
+                                  <div className="text-center text-white">
+                                    <Users className="w-16 h-16 mx-auto mb-3 opacity-50" />
+                                    <p className="text-sm font-medium opacity-70">Registration</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                     
                     <div className="p-8">
-                      <p className="text-slate-700 leading-relaxed font-medium mb-6">
-                        {exam.registration.description}
-                      </p>
-                      
                       {exam.registration.bullet_points && exam.registration.bullet_points.length > 0 && (
                         <div className="space-y-3">
                           <h3 className="text-lg font-bold text-slate-900 mb-4">Registration Steps</h3>
                           {exam.registration.bullet_points.map((point, index) => (
-                            <div key={index} className="flex items-start gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                            <div key={index} className="flex items-start gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors duration-200">
                               <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                 <span className="text-sm font-bold">{index + 1}</span>
                               </div>
