@@ -54,11 +54,21 @@ export async function POST(request: NextRequest) {
       name, 
       slug, 
       country_ref, 
-      exams, 
+      exams,
+      // New comprehensive sections
+      overview,
+      key_highlights,
+      why_choose_us,
+      ranking,
+      admission_process,
+      documents_required,
+      fees_structure,
+      campus_highlights,
+      // Legacy fields for backward compatibility
       fees, 
       duration, 
       establishment_year,
-      ranking,
+      ranking: legacyRanking,
       banner_url, 
       about_content, 
       is_active 
@@ -68,19 +78,25 @@ export async function POST(request: NextRequest) {
       name,
       slug,
       country_ref,
-      exams,
-      fees,
-      duration,
-      establishment_year,
+      overview,
+      key_highlights,
+      why_choose_us,
       ranking,
-      banner_url,
-      about_content,
+      admission_process,
+      documents_required,
+      fees_structure,
+      campus_highlights,
       is_active
     });
 
     // Validation using utility
     console.log('✅ [API] Starting validation...');
-    validateRequiredFields(body, ['name', 'slug', 'country_ref', 'fees', 'duration', 'about_content']);
+    validateRequiredFields(body, ['name', 'slug', 'country_ref']);
+    
+    // Validate that at least overview description is provided
+    if (!overview?.description) {
+      throw new ValidationError("Overview description is required");
+    }
     console.log('✅ [API] Validation passed');
 
     // Find country by slug to get ObjectId
@@ -122,12 +138,61 @@ export async function POST(request: NextRequest) {
       slug,
       country_ref: country._id, // Use the ObjectId from the found country
       exams: exams || [],
-      fees: Number(fees),
+      
+      // New comprehensive structure
+      overview: overview || {
+        title: "Overview",
+        description: about_content || ""
+      },
+      key_highlights: key_highlights || {
+        title: "Key Highlights",
+        description: "",
+        features: []
+      },
+      why_choose_us: why_choose_us || {
+        title: "Why Choose Us",
+        description: "",
+        features: []
+      },
+      ranking: ranking || {
+        title: "Ranking & Recognition",
+        description: "",
+        country_ranking: legacyRanking || "",
+        world_ranking: "",
+        accreditation: []
+      },
+      admission_process: admission_process || {
+        title: "Admission Process",
+        description: "",
+        steps: []
+      },
+      documents_required: documents_required || {
+        title: "Documents Required",
+        description: "",
+        documents: []
+      },
+      fees_structure: fees_structure || {
+        title: "Fees Structure",
+        description: "",
+        courses: [{
+          course_name: "Program",
+          duration: duration || "N/A",
+          annual_tuition_fee: fees ? `₹${fees.toLocaleString()}` : "N/A"
+        }]
+      },
+      campus_highlights: campus_highlights || {
+        title: "Campus Highlights",
+        description: "",
+        highlights: []
+      },
+
+      // Legacy fields for backward compatibility
+      fees: fees ? Number(fees) : undefined,
       duration,
       establishment_year,
-      ranking,
       banner_url: banner_url || "",
       about_content,
+      
       is_active: is_active !== undefined ? is_active : true,
     });
 

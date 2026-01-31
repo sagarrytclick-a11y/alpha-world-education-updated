@@ -52,11 +52,21 @@ export async function PUT(
       name, 
       slug, 
       country_ref, 
-      exams, 
+      exams,
+      // New comprehensive sections
+      overview,
+      key_highlights,
+      why_choose_us,
+      ranking,
+      admission_process,
+      documents_required,
+      fees_structure,
+      campus_highlights,
+      // Legacy fields for backward compatibility
       fees, 
       duration, 
       establishment_year,
-      ranking,
+      ranking: legacyRanking,
       banner_url, 
       about_content, 
       is_active 
@@ -104,14 +114,27 @@ export async function PUT(
     }
 
     const updateData: Record<string, unknown> = {};
+    
+    // Basic fields
     if (name !== undefined) updateData.name = name;
     if (slug !== undefined) updateData.slug = slug;
     if (countryObjectId !== undefined) updateData.country_ref = countryObjectId;
     if (exams !== undefined) updateData.exams = exams;
+    
+    // New comprehensive structure
+    if (overview !== undefined) updateData.overview = overview;
+    if (key_highlights !== undefined) updateData.key_highlights = key_highlights;
+    if (why_choose_us !== undefined) updateData.why_choose_us = why_choose_us;
+    if (ranking !== undefined) updateData.ranking = ranking;
+    if (admission_process !== undefined) updateData.admission_process = admission_process;
+    if (documents_required !== undefined) updateData.documents_required = documents_required;
+    if (fees_structure !== undefined) updateData.fees_structure = fees_structure;
+    if (campus_highlights !== undefined) updateData.campus_highlights = campus_highlights;
+    
+    // Legacy fields for backward compatibility
     if (fees !== undefined) updateData.fees = fees;
     if (duration !== undefined) updateData.duration = duration;
     if (establishment_year !== undefined) updateData.establishment_year = establishment_year;
-    if (ranking !== undefined) updateData.ranking = ranking;
     if (banner_url !== undefined) updateData.banner_url = banner_url;
     if (about_content !== undefined) updateData.about_content = about_content;
     if (is_active !== undefined) updateData.is_active = is_active;

@@ -470,7 +470,9 @@ export default function FeaturedSection() {
             name: u.name,
             image: u.banner_url,
             location: u.city,
-            ranking: u.ranking,
+            ranking: typeof u.ranking === 'object' && u.ranking?.country_ranking 
+              ? `Country #${u.ranking.country_ranking}${u.ranking.world_ranking ? ` | World #${u.ranking.world_ranking}` : ''}`
+              : u.ranking,
             fees: u.fees,
             duration: u.duration,
             establishment_year: u.establishment_year,
